@@ -27,16 +27,16 @@
 </i18n>
 
 <template>
-  <v-layout
-    align-center
-    justify-center
+  <v-row
+    align="center"
+    justify="center"
   >
-    <v-flex
-      xs12
-      sm10
-      md8
-      lg7
-      xl6
+    <v-col
+      cols="12"
+      sm="10"
+      md="8"
+      lg="7"
+      xl="6"
     >
       <v-list
         v-for="[key, value] in Object.entries(profiles)"
@@ -48,33 +48,31 @@
           {{ $t('categories.' + key) }}
         </v-subheader>
 
-        <v-list-tile
+        <v-list-item
           v-for="profile in value"
           :key="profile.name"
-          avatar
           class="grow px-3"
         >
-          <v-list-tile-avatar>
+          <v-list-item-avatar>
             <v-img
               :src="'https://penguin-stats.s3-ap-southeast-1.amazonaws.com/avatar/' + profile.avatar"
             />
-          </v-list-tile-avatar>
+          </v-list-item-avatar>
 
-          <v-list-tile-content class="collaborator-profile">
-            <v-list-tile-title>
+          <v-list-item-content class="collaborator-profile">
+            <v-list-item-title>
               {{ profile.name }}
-            </v-list-tile-title>
+            </v-list-item-title>
 
-            <v-list-tile-sub-title>
+            <v-list-item-sub-title>
               {{ profile.responsibility }}
-            </v-list-tile-sub-title>
-          </v-list-tile-content>
-          <v-list-tile-action>
-            <v-layout
-              align-center
-              justify-end
-              wrap
-              fill-height
+            </v-list-item-sub-title>
+          </v-list-item-content>
+          <v-list-item-action>
+            <v-row
+              class="fill-height"
+              align="center"
+              justify="end"
             >
               <v-tooltip
                 v-for="[id, url] in Object.entries(profile.socials)"
@@ -95,12 +93,18 @@
                 </template>
                 <span>{{ $t(`socials.${id}`) }}</span>
               </v-tooltip>
-            </v-layout>
-          </v-list-tile-action>
-        </v-list-tile>
+            </v-row>
+          </v-list-item-action>
+        </v-list-item>
+        </v-list-item-action>
+        </v-list-item-sub-title>
+        </v-list-item-title>
+        </v-list-item-content>
+        </v-list-item-avatar>
+        </v-list-item>
       </v-list>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script>

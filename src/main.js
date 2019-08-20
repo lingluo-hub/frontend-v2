@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import './plugins/vuetify'
+import vuetify from './plugins/vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import App from './App.vue'
 import router from './router'
@@ -40,6 +40,7 @@ new Vue({
   router,
   store,
   i18n,
+  vuetify,
   created() {
     AOS.init({
       delay: 100,

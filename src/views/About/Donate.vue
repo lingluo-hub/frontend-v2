@@ -21,13 +21,10 @@
     </v-card-title>
 
     <v-card-title>
-      <v-layout
-        row
-        wrap
-      >
-        <v-flex
-          xs6
-          md6
+      <v-row>
+        <v-col
+          cols="6"
+          md="6"
         >
           <v-card class="transparent pa-4">
             <v-img
@@ -36,21 +33,20 @@
             />
 
             <v-card-title primary-title>
-              <v-layout
-                align-center
-                justify-center
-                row
-                fill-height
+              <v-row
+                class="fill-height"
+                align="center"
+                justify="center"
               >
                 支付宝
-              </v-layout>
+              </v-row>
             </v-card-title>
           </v-card>
-        </v-flex>
+        </v-col>
 
-        <v-flex
-          xs6
-          md6
+        <v-col
+          cols="6"
+          md="6"
         >
           <v-card class="transparent pa-4">
             <v-img
@@ -59,18 +55,17 @@
             />
 
             <v-card-title primary-title>
-              <v-layout
-                align-center
-                justify-center
-                row
-                fill-height
+              <v-row
+                class="fill-height"
+                align="center"
+                justify="center"
               >
                 微信支付
-              </v-layout>
+              </v-row>
             </v-card-title>
           </v-card>
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </v-card-title>
   </v-card>
 </template>

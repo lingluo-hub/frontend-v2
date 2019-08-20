@@ -20,7 +20,7 @@
         </v-card-title>
 
         <v-card-text>
-          <p class="subheading font-weight-bold">
+          <p class="subtitle-1 font-weight-bold">
             {{ $t('builds.development.description') }}
           </p>
         </v-card-text>
@@ -76,25 +76,25 @@
           v-for="route in routes"
           :key="route.name"
         >
-          <v-list-tile
+          <v-list-item
             v-if="!route.children"
             :key="route.name"
             :to="route.path"
           >
-            <v-list-tile-action>
+            <v-list-item-action>
               <v-icon>{{ route.meta.icon }}</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>
                 {{ $t(route.meta.i18n) }} &nbsp; <v-icon
                   v-if="!route.component"
                   small
                 >
                   mdi-open-in-new
                 </v-icon>
-              </v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
           <v-list-group
             v-else
             v-model="route.meta.active"
@@ -103,35 +103,37 @@
             mandatory
           >
             <template v-slot:activator>
-              <v-list-tile>
-                <v-list-tile-content>
-                  <v-list-tile-title>{{ $t(route.meta.i18n) }}</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ $t(route.meta.i18n) }}
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
             </template>
 
-            <v-list-tile
+            <v-list-item
               v-for="child in route.children.filter(el => !(el.meta.hide))"
               :key="child.name"
               :to="{ 'name': child.name }"
             >
-              <v-list-tile-content>
-                <v-list-tile-title>{{ $t(child.meta.i18n) }}</v-list-tile-title>
-              </v-list-tile-content>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ $t(child.meta.i18n) }}
+                </v-list-item-title>
+              </v-list-item-content>
 
-              <v-list-tile-action>
+              <v-list-item-action>
                 <v-icon>{{ child.meta.icon }}</v-icon>
-              </v-list-tile-action>
-            </v-list-tile>
+              </v-list-item-action>
+            </v-list-item>
           </v-list-group>
         </div>
 
         <v-divider class="my-2" />
 
-        <v-layout
-          justify-end
-          row
-          wrap
+        <v-row
+          justify="end"
         >
           <v-btn
             icon
@@ -153,16 +155,18 @@
             </template>
 
             <v-list>
-              <v-list-tile
+              <v-list-item
                 v-for="(locale, i) in localizations"
                 :key="i"
                 @click="changeLocale(locale.id)"
               >
-                <v-list-tile-title>{{ locale.name }}</v-list-tile-title>
-              </v-list-tile>
+                <v-list-item-title>
+                  {{ locale.name }}
+                </v-list-item-title>
+              </v-list-item>
             </v-list>
           </v-menu>
-        </v-layout>
+        </v-row>
       </v-list>
     </v-navigation-drawer>
     <v-toolbar
@@ -202,7 +206,7 @@
     </v-content>
     <v-footer
       color="blue darken-3"
-      class="white--text px-3"
+      class="white--text"
       app
     >
       <a

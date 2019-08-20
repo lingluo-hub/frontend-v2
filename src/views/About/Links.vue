@@ -1,14 +1,11 @@
 <template>
-  <v-layout
-    row
-    wrap
-  >
-    <v-flex
+  <v-row>
+    <v-col
       v-for="(link, index) in links"
       :key="index"
-      d-flex
-      sm6
-      md4
+      class="d-flex"
+      sm="6"
+      md="4"
     >
       <v-card
         class="bkop-light"
@@ -47,11 +44,10 @@
           v-if="link.url"
           class="px-3 pt-2 pb-3"
         >
-          <v-layout
-            align-center
-            justify-center
-            row
-            fill-height
+          <v-row
+            class="fill-height"
+            align="center"
+            justify="center"
           >
             <v-chip
               class="ma-2"
@@ -64,30 +60,29 @@
                 mdi-share
               </v-icon>
             </v-chip>
-          </v-layout>
+          </v-row>
         </div>
-        <v-layout
-          align-center
-          justify-center
-          fill-height
+        <v-row
+          class="fill-height"
+          align="center"
+          justify="center"
         >
           <div
             v-if="link.text"
             class="pa-3"
           >
-            <v-layout
-              align-center
-              justify-center
-              row
-              fill-height
+            <v-row
+              class="fill-height"
+              align="center"
+              justify="center"
             >
               {{ link.text }}
-            </v-layout>
+            </v-row>
           </div>
-        </v-layout>
+        </v-row>
       </v-card>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script>

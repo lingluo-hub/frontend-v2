@@ -35,11 +35,8 @@
     </v-card-title>
 
     <v-card-title>
-      <v-layout
-        align-start
-        justify-center
-        column
-        fill-height
+      <v-col
+        class="fill-height"
       >
         <v-list class="transparent">
           <template v-for="(skill, key) in skills">
@@ -50,7 +47,7 @@
             />
           </template>
         </v-list>
-      </v-layout>
+      </v-col>
     </v-card-title>
   </v-card>
 </template>

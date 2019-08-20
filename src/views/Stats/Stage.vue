@@ -105,20 +105,21 @@
               {{ $t(['zone.types', zoneCategory.id].join('.')) }}
             </v-subheader>
 
-            <v-list-tile
+            <v-list-item
               v-for="zone in zoneCategory.zones"
               :key="zone.zoneId"
               v-ripple
-              avatar
               @click="storeZoneSelection(zone.zoneId)"
             >
-              <v-list-tile-avatar>
+              <v-list-item-avatar>
                 <v-icon>{{ zone.icon }}</v-icon>
-              </v-list-tile-avatar>
+              </v-list-item-avatar>
 
-              <v-list-tile-content>
-                <v-list-tile-title>{{ zone.zoneName }}</v-list-tile-title>
-                <v-list-tile-sub-title v-if="zone.isActivity">
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ zone.zoneName }}
+                </v-list-item-title>
+                <v-list-item-sub-title v-if="zone.isActivity">
                   <span
                     :class="{
                       'text--darken-1 font-weight-bold': true,
@@ -128,15 +129,21 @@
                     {{ zone.isOutdated ? "已结束" : "正在进行" }}
                   </span>
                   {{ $t('opensAt', zone.activityActiveTime) }}
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
+                </v-list-item-sub-title>
+              </v-list-item-content>
 
-              <v-list-tile-action>
+              <v-list-item-action>
                 <v-icon color="grey lighten-1">
                   mdi-chevron-right
                 </v-icon>
-              </v-list-tile-action>
-            </v-list-tile>
+              </v-list-item-action>
+            </v-list-item>
+            </v-list-item-action>
+            </v-list-item-sub-title>
+            </v-list-item-title>
+            </v-list-item-content>
+            </v-list-item-avatar>
+            </v-list-item>
           </v-list>
         </v-container>
       </v-stepper-content>
@@ -162,30 +169,29 @@
               {{ selectedZone.zoneName || '' }}
             </v-subheader>
 
-            <v-list-tile
+            <v-list-item
               v-for="stage in stages"
               :key="stage.stageId"
               v-ripple
-              avatar
               @click="storeStageSelection(stage.stageId)"
             >
-              <v-list-tile-avatar>
+              <v-list-item-avatar>
                 <v-icon>mdi-cube-outline</v-icon>
-              </v-list-tile-avatar>
+              </v-list-item-avatar>
 
-              <v-list-tile-content>
-                <v-list-tile-title>{{ stage.code }}</v-list-tile-title>
-                <v-list-tile-sub-title>
-                  <v-layout
-                    align-center
-                    justify-start
-                    row
-                    wrap
-                    d-inline-flex
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ stage.code }}
+                </v-list-item-title>
+                <v-list-item-sub-title>
+                  <v-row
+                    class="d-inline-flex"
+                    align="center"
+                    justify="start"
                   >
-                    <v-flex :class="{ 'yellow--text font-weight-bold': true, 'amber--text text--darken-4': !$vuetify.dark }">
+                    <v-col :class="{ 'yellow--text font-weight-bold': true, 'amber--text text--darken-4': !$vuetify.theme.dark }">
                       {{ $t('stage.apCost', {apCost: stage.apCost}) }}
-                    </v-flex>
+                    </v-col>
 
                     <v-divider
                       v-if="stage.normalDrop.length > 0"
@@ -193,7 +199,7 @@
                       class="hidden-xs-only mx-1"
                     />
 
-                    <v-flex
+                    <v-col
                       v-if="stage.normalDrop.length > 0"
                       class="hidden-xs-only"
                     >
@@ -205,7 +211,7 @@
                         :ratio="0.5"
                         disable-link
                       />
-                    </v-flex>
+                    </v-col>
 
                     <v-divider
                       v-if="stage.extraDrop.length > 0"
@@ -213,7 +219,7 @@
                       class="hidden-sm-and-down mx-1"
                     />
 
-                    <v-flex
+                    <v-col
                       v-if="stage.extraDrop.length > 0"
                       class="hidden-sm-and-down"
                     >
@@ -225,7 +231,7 @@
                         :ratio="0.5"
                         disable-link
                       />
-                    </v-flex>
+                    </v-col>
 
                     <v-divider
                       v-if="stage.specialDrop.length > 0"
@@ -233,7 +239,7 @@
                       class="hidden-sm-and-down mx-1"
                     />
 
-                    <v-flex
+                    <v-col
                       v-if="stage.specialDrop.length > 0"
                       class="hidden-sm-and-down"
                     >
@@ -245,34 +251,40 @@
                         :ratio="0.5"
                         disable-link
                       />
-                    </v-flex>
-                  </v-layout>
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
+                    </v-col>
+                  </v-row>
+                </v-list-item-sub-title>
+              </v-list-item-content>
 
-              <v-list-tile-action>
+              <v-list-item-action>
                 <v-icon color="grey lighten-1">
                   mdi-chevron-right
                 </v-icon>
-              </v-list-tile-action>
-            </v-list-tile>
+              </v-list-item-action>
+            </v-list-item>
+            </v-list-item-action>
+            </v-list-item-sub-title>
+            </v-list-item-title>
+            </v-list-item-content>
+            </v-list-item-avatar>
+            </v-list-item>
           </v-list>
         </v-container>
       </v-stepper-content>
 
       <v-stepper-content :step="3">
-        <v-layout
-          align-center
-          justify-space-between
+        <v-row
+          align="center"
+          justify="space-between"
         >
           <h1 class="title ma-3">
             {{ $t('stats.title', {stage: selectedStage.code}) }}
           </h1>
           <DataSourceToggle />
-        </v-layout>
+        </v-row>
         <v-data-table
-          :headers="tableHeaders"
-          :items="stageStats"
+          :header="tableHeaders"
+          :item="stageStats"
           :pagination.sync="tablePagination"
           must-sort
           hide-actions
@@ -328,19 +340,19 @@
                 </span>
               </td>
               <td
-                class="text-xs-center"
+                class="text-center"
                 :class="{'px-3': $vuetify.breakpoint.xsOnly}"
               >
                 {{ props.item.times }}
               </td>
               <td
-                class="text-xs-center"
+                class="text-center"
                 :class="{'px-3': $vuetify.breakpoint.xsOnly}"
               >
                 {{ props.item.quantity }}
               </td>
               <td
-                class="text-xs-center"
+                class="text-center"
                 :class="{'px-3': $vuetify.breakpoint.xsOnly}"
               >
                 <div
@@ -367,7 +379,7 @@
                 </div>
               </td>
               <td
-                class="text-xs-center"
+                class="text-center"
                 :class="{'px-3': $vuetify.breakpoint.xsOnly}"
               >
                 {{ props.item.apPPR }}

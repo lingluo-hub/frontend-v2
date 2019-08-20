@@ -3,61 +3,57 @@
     fluid
     grid-list-sm
   >
-    <v-layout
-      row
-      wrap
-    >
-      <v-flex
-        xs12
-        sm6
+    <v-row>
+      <v-col
+        cols="12"
+        sm="6"
       >
         <Intro
           class="home-card"
           data-aos="fade"
         />
-      </v-flex>
-      <v-flex
-        xs12
-        sm6
+      </v-col>
+      <v-col
+        cols="12"
+        sm="6"
       >
         <Contact
           class="home-card"
           data-aos="fade"
         />
-      </v-flex>
-      <v-flex
-        xs12
-        sm6
+      </v-col>
+      <v-col
+        cols="12"
+        sm="6"
       >
         <Contribute
           class="home-card"
           data-aos="fade"
         />
-      </v-flex>
-      <v-flex
-        xs12
-        sm6
+      </v-col>
+      <v-col
+        cols="12"
+        sm="6"
       >
         <Donate
           class="home-card"
           data-aos="fade"
         />
-      </v-flex>
+      </v-col>
 
-      <v-flex
-        xs4
-        md4
+      <v-col
+        cols="4"
+        md="4"
       >
         <v-card
           class="mx-auto bkop-light"
           data-aos="fade"
         >
           <v-card-title>
-            <v-layout
-              align-center
-              justify-center
-              row
-              fill-height
+            <v-row
+              class="fill-height"
+              align="center"
+              justify="center"
             >
               <span class="cursor-pointer">
                 <v-chip
@@ -72,25 +68,24 @@
                   </v-icon>
                 </v-chip>
               </span>
-            </v-layout>
+            </v-row>
           </v-card-title>
         </v-card>
-      </v-flex>
+      </v-col>
 
-      <v-flex
-        xs4
-        md4
+      <v-col
+        cols="4"
+        md="4"
       >
         <v-card
           class="mx-auto bkop-light"
           data-aos="fade"
         >
           <v-card-title>
-            <v-layout
-              align-center
-              justify-center
-              row
-              fill-height
+            <v-row
+              class="fill-height"
+              align="center"
+              justify="center"
             >
               <span class="cursor-pointer">
                 <v-chip
@@ -105,25 +100,24 @@
                   </v-icon>
                 </v-chip>
               </span>
-            </v-layout>
+            </v-row>
           </v-card-title>
         </v-card>
-      </v-flex>
+      </v-col>
 
-      <v-flex
-        xs4
-        md4
+      <v-col
+        cols="4"
+        md="4"
       >
         <v-card
           class="mx-auto bkop-light"
           data-aos="fade"
         >
           <v-card-title>
-            <v-layout
-              align-center
-              justify-center
-              row
-              fill-height
+            <v-row
+              class="fill-height"
+              align="center"
+              justify="center"
             >
               <span class="cursor-pointer">
                 <v-chip
@@ -138,11 +132,11 @@
                   </v-icon>
                 </v-chip>
               </span>
-            </v-layout>
+            </v-row>
           </v-card-title>
         </v-card>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

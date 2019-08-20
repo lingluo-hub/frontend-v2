@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import Vuetify, { VLayout } from 'vuetify/lib'
-import 'vuetify/src/stylus/app.styl'
 
-Vue.use(Vuetify, {
-  iconfont: 'mdi',
+Vue.use(Vuetify);
+
+export default new Vuetify({
   components: {
     VLayout
   }
-});
+})

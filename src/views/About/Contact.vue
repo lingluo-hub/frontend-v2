@@ -5,10 +5,7 @@
     </v-card-title>
 
     <v-card-title>
-      <v-layout
-        column
-        wrap
-      >
+      <v-col>
         <div>
           <span>
             <v-chip
@@ -52,7 +49,7 @@
             </v-chip>
           </span>
         </div>
-      </v-layout>
+      </v-col>
     </v-card-title>
   </v-card>
 </template>

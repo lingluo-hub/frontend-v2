@@ -95,12 +95,12 @@
       </v-stepper-content>
 
       <v-stepper-content :step="2">
-        <v-layout
-          align-center
-          justify-space-between
+        <v-row
+          align="center"
+          justify="space-between"
         >
           <h1 class="title mx-3 my-1">
-            <v-layout align-center>
+            <v-row align="center">
               <Item
                 v-if="selected.item"
                 :item="selected.item"
@@ -108,16 +108,16 @@
                 disable-tooltip
                 disable-link
               />
-              <v-flex class="ml-2">
+              <v-col class="ml-2">
                 {{ $t('result.title', {item: selectedItemName}) }}
-              </v-flex>
-            </v-layout>
+              </v-col>
+            </v-row>
           </h1>
           <DataSourceToggle />
-        </v-layout>
+        </v-row>
         <v-data-table
-          :headers="tableHeaders"
-          :items="itemStagesStats"
+          :header="tableHeaders"
+          :item="itemStagesStats"
           :pagination.sync="tablePagination"
           must-sort
           hide-actions
@@ -125,83 +125,85 @@
           :calculate-widths="true"
         >
           <template v-slot:items="props">
-            <td 
-              :class="{
-                'px-3': $vuetify.breakpoint.xsOnly,
-                'stage-code-td-xs': $vuetify.breakpoint.xsOnly
-              }"
-            >
-              <span
-                class="cursor-pointer"
-                @click="redirectStage(props.item)"
+            <tr>
+              <td
+                :class="{
+                  'px-3': $vuetify.breakpoint.xsOnly,
+                  'stage-code-td-xs': $vuetify.breakpoint.xsOnly
+                }"
               >
-                <v-hover>
-                  <span slot-scope="{ hover }">
-                    <v-avatar
-                      :size="30"
-                      class="mr-1"
-                    >
-                      <v-icon>{{ props.item.zone.icon }}</v-icon>
-                    </v-avatar>
-                    {{ props.item.stage.code }}
-                    <v-slide-x-transition>
-                      <v-icon
-                        v-if="hover || $vuetify.breakpoint.smAndDown"
-                        small
-                      >mdi-chevron-right</v-icon>
-                    </v-slide-x-transition>
-                  </span>
-                </v-hover>
-              </span>
-            </td>
-            <td
-              class="text-xs-center"
-              :class="{'px-3': $vuetify.breakpoint.xsOnly}"
-            >
-              {{ props.item.stage.apCost }}
-            </td>
-            <td
-              class="text-xs-center"
-              :class="{'px-3': $vuetify.breakpoint.xsOnly}"
-            >
-              {{ props.item.times }}
-            </td>
-            <td
-              class="text-xs-center"
-              :class="{'px-3': $vuetify.breakpoint.xsOnly}"
-            >
-              {{ props.item.quantity }}
-            </td>
-            <td
-              class="text-xs-center"
-              :class="{'px-3': $vuetify.breakpoint.xsOnly}"
-            >
-              <div class="charts-data-wrapper">
-                {{ props.item.percentageText }}
-                <div
-                  class="charts-wrapper cursor-pointer"
-                  fill-height
+                <span
+                  class="cursor-pointer"
+                  @click="redirectStage(props.item)"
                 >
-                  <Charts
-                    v-if="getStageItemTrend(props.item.stage.stageId)"
-                    :interval="getStageItemTrendInterval(props.item.stage.stageId)"
-                    :x-start="getStageItemTrendStartTime(props.item.stage.stageId)"
-                    :show-dialog="expanded[props.item.stage.stageId]"
-                    :data-keys="['quantity']"
-                    sparkline-key="quantity"
-                    sparkline-sub-key="times"
-                    :data="getStageItemTrendResults(props.item.stage.stageId)"
-                    :charts-id="props.item.stage.stageId"
-                  />
+                  <v-hover>
+                    <span slot-scope="{ hover }">
+                      <v-avatar
+                        :size="30"
+                        class="mr-1"
+                      >
+                        <v-icon>{{ props.item.zone.icon }}</v-icon>
+                      </v-avatar>
+                      {{ props.item.stage.code }}
+                      <v-slide-x-transition>
+                        <v-icon
+                          v-if="hover || $vuetify.breakpoint.smAndDown"
+                          small
+                        >mdi-chevron-right</v-icon>
+                      </v-slide-x-transition>
+                    </span>
+                  </v-hover>
+                </span>
+              </td>
+              <td
+                class="text-center"
+                :class="{'px-3': $vuetify.breakpoint.xsOnly}"
+              >
+                {{ props.item.stage.apCost }}
+              </td>
+              <td
+                class="text-center"
+                :class="{'px-3': $vuetify.breakpoint.xsOnly}"
+              >
+                {{ props.item.times }}
+              </td>
+              <td
+                class="text-center"
+                :class="{'px-3': $vuetify.breakpoint.xsOnly}"
+              >
+                {{ props.item.quantity }}
+              </td>
+              <td
+                class="text-center"
+                :class="{'px-3': $vuetify.breakpoint.xsOnly}"
+              >
+                <div class="charts-data-wrapper">
+                  {{ props.item.percentageText }}
+                  <div
+                    class="charts-wrapper cursor-pointer"
+                    fill-height
+                  >
+                    <Charts
+                      v-if="getStageItemTrend(props.item.stage.stageId)"
+                      :interval="getStageItemTrendInterval(props.item.stage.stageId)"
+                      :x-start="getStageItemTrendStartTime(props.item.stage.stageId)"
+                      :show-dialog="expanded[props.item.stage.stageId]"
+                      :data-keys="['quantity']"
+                      sparkline-key="quantity"
+                      sparkline-sub-key="times"
+                      :data="getStageItemTrendResults(props.item.stage.stageId)"
+                      :charts-id="props.item.stage.stageId"
+                    />
+                  </div>
                 </div>
-              </div>
-            </td>
-            <td
-              class="text-xs-center"
-              :class="{'px-3': $vuetify.breakpoint.xsOnly}"
-            >
-              {{ props.item.apPPR }}
-            </td>
+              </td>
+              <td
+                class="text-center"
+                :class="{'px-3': $vuetify.breakpoint.xsOnly}"
+              >
+                {{ props.item.apPPR }}
+              </td>
+            </tr>
           </template>
         </v-data-table>
       </v-stepper-content>

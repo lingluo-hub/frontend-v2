@@ -20,14 +20,14 @@
 </i18n>
 
 <template>
-  <v-layout
-    row
-    wrap
-    align-center
-    justify-start
+  <v-row
+    
+    
+    align="center"
+    justify="start"
     class="px-1 pb-1"
   >
-    <v-flex>
+    <v-col>
       <!-- <v-badge
         color="red"
         :value="quantity > 0"
@@ -66,8 +66,8 @@
         </div>
       </v-badge>
       <!-- </v-badge> -->
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script>

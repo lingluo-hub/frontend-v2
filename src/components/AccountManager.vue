@@ -35,7 +35,7 @@
     >
       {{ snackbar.text }}
       <v-btn
-        flat
+        text
         @click="snackbar.enabled = false"
       >
         {{ $t('dialog.close') }}
@@ -54,7 +54,6 @@
         </v-card-title>
         <v-card-text>
           <v-alert
-            :value="true"
             type="info"
           >
             {{ $t('notice') }}
@@ -66,7 +65,7 @@
             required
             hide-details
 
-            outline
+            outlined
 
             @keyup.enter.native="login"
           />
@@ -130,7 +129,7 @@
         <v-btn
           v-if="hover && !mobile"
           key="logout"
-          round
+          rounded
           @click="logout"
         >
           <v-icon
@@ -159,7 +158,7 @@
 
     <v-btn
       v-if="!$store.getters.authed"
-      round
+      rounded
       icon
       @click="auth.dialog = true"
     >

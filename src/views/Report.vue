@@ -89,8 +89,8 @@
 
 <template>
   <v-container
+    class="fill-height"
     fluid
-    fill-height
   >
     <v-snackbar
       v-model="snackbar"
@@ -100,14 +100,14 @@
       {{ $t('report.success') }}
       <v-btn
         :loading="undoing"
-        flat
+        text
         @click="undo"
       >
         {{ $t('report.undo') }}
       </v-btn>
     </v-snackbar>
-    <v-layout align-center>
-      <v-flex>
+    <v-row align="center">
+      <v-col>
         <v-stepper
           v-model="step"
           class="bkop-light transparent"
@@ -161,34 +161,41 @@
                     {{ $t(['zone.types', zoneCategory.id].join('.')) }}
                   </v-subheader>
 
-                  <v-list-tile
+                  <v-list-item
                     v-for="zone in zoneCategory.zones"
                     :key="zone.zoneId"
                     v-ripple
                     :disabled="zone.isOutdated"
-                    avatar
                     @click="storeZoneSelection(zone.zoneId)"
                   >
-                    <v-list-tile-avatar>
+                    <v-list-item-avatar>
                       <v-icon>{{ zone.icon }}</v-icon>
-                    </v-list-tile-avatar>
+                    </v-list-item-avatar>
 
-                    <v-list-tile-content>
-                      <v-list-tile-title>{{ zone.zoneName }}</v-list-tile-title>
-                      <v-list-tile-sub-title v-if="zone.isActivity">
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        {{ zone.zoneName }}
+                      </v-list-item-title>
+                      <v-list-item-sub-title v-if="zone.isActivity">
                         <span
                           :class="{ 'text--darken-1 font-weight-bold': true, 'red--text': zone.isOutdated, 'green--text': !zone.isOutdated }"
                         >{{ zone.isOutdated ? "已结束" : "正在进行" }}</span>
                         {{ $t('opensAt', zone.activityActiveTime) }}
-                      </v-list-tile-sub-title>
-                    </v-list-tile-content>
+                      </v-list-item-sub-title>
+                    </v-list-item-content>
 
-                    <v-list-tile-action>
+                    <v-list-item-action>
                       <v-icon color="grey lighten-1">
                         mdi-chevron-right
                       </v-icon>
-                    </v-list-tile-action>
-                  </v-list-tile>
+                    </v-list-item-action>
+                  </v-list-item>
+                  </v-list-item-action>
+                  </v-list-item-sub-title>
+                  </v-list-item-title>
+                  </v-list-item-content>
+                  </v-list-item-avatar>
+                  </v-list-item>
                 </v-list>
               </v-container>
             </v-stepper-content>
@@ -214,30 +221,29 @@
                     {{ selectedZone.zoneName || '' }}
                   </v-subheader>
 
-                  <v-list-tile
+                  <v-list-item
                     v-for="stage in stages"
                     :key="stage.stageId"
                     v-ripple
-                    avatar
                     @click="storeStageSelection(stage.stageId)"
                   >
-                    <v-list-tile-avatar>
+                    <v-list-item-avatar>
                       <v-icon>mdi-cube-outline</v-icon>
-                    </v-list-tile-avatar>
+                    </v-list-item-avatar>
 
-                    <v-list-tile-content>
-                      <v-list-tile-title>{{ stage.code }}</v-list-tile-title>
-                      <v-list-tile-sub-title>
-                        <v-layout
-                          align-center
-                          justify-start
-                          row
-                          wrap
-                          d-inline-flex
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        {{ stage.code }}
+                      </v-list-item-title>
+                      <v-list-item-sub-title>
+                        <v-row
+                          class="d-inline-flex"
+                          align="center"
+                          justify="start"
                         >
-                          <v-flex :class="{ 'yellow--text font-weight-bold': true, 'amber--text text--darken-4': !$vuetify.dark }">
+                          <v-col :class="{ 'yellow--text font-weight-bold': true, 'amber--text text--darken-4': !$vuetify.theme.dark }">
                             {{ $t('stage.apCost', {apCost: stage.apCost}) }}
-                          </v-flex>
+                          </v-col>
 
                           <v-divider
                             v-if="stage.normalDrop.length > 0"
@@ -245,7 +251,7 @@
                             class="hidden-xs-only mx-1"
                           />
 
-                          <v-flex
+                          <v-col
                             v-if="stage.normalDrop.length > 0"
                             class="hidden-xs-only"
                           >
@@ -257,7 +263,7 @@
                               :ratio="0.5"
                               disable-link
                             />
-                          </v-flex>
+                          </v-col>
 
                           <v-divider
                             v-if="stage.extraDrop.length > 0"
@@ -265,7 +271,7 @@
                             class="hidden-sm-and-down mx-1"
                           />
 
-                          <v-flex
+                          <v-col
                             v-if="stage.extraDrop.length > 0"
                             class="hidden-sm-and-down"
                           >
@@ -277,7 +283,7 @@
                               :ratio="0.5"
                               disable-link
                             />
-                          </v-flex>
+                          </v-col>
 
                           <v-divider
                             v-if="stage.specialDrop.length > 0"
@@ -285,7 +291,7 @@
                             class="hidden-sm-and-down mx-1"
                           />
 
-                          <v-flex
+                          <v-col
                             v-if="stage.specialDrop.length > 0"
                             class="hidden-sm-and-down"
                           >
@@ -297,24 +303,29 @@
                               :ratio="0.5"
                               disable-link
                             />
-                          </v-flex>
-                        </v-layout>
-                      </v-list-tile-sub-title>
-                    </v-list-tile-content>
+                          </v-col>
+                        </v-row>
+                      </v-list-item-sub-title>
+                    </v-list-item-content>
 
-                    <v-list-tile-action>
+                    <v-list-item-action>
                       <v-icon color="grey lighten-1">
                         mdi-chevron-right
                       </v-icon>
-                    </v-list-tile-action>
-                  </v-list-tile>
+                    </v-list-item-action>
+                  </v-list-item>
+                  </v-list-item-action>
+                  </v-list-item-sub-title>
+                  </v-list-item-title>
+                  </v-list-item-content>
+                  </v-list-item-avatar>
+                  </v-list-item>
                 </v-list>
               </v-container>
             </v-stepper-content>
 
             <v-stepper-content :step="3">
               <v-alert
-                :value="true"
                 color="warning"
                 class="mb-3"
               >
@@ -341,15 +352,15 @@
                 <v-subheader>
                   {{ $t('stage.loots.' + stage.id) }}
                 </v-subheader>
-                <v-flex
+                <v-col
                   v-for="item in stage.drops"
                   :key="item.itemId"
                   class="py-1 px-2 d-inline-block"
-                  xs12
-                  sm6
-                  md4
-                  lg3
-                  xl2
+                  cols="12"
+                  sm="6"
+                  md="4"
+                  lg="3"
+                  xl="2"
                 >
                   <!--                  <h5 class="title mb-3">-->
                   <!--                    {{ item.name }}-->
@@ -361,27 +372,27 @@
                     @change="handleChange"
                     @change:valid="validChange"
                   />
-                </v-flex>
+                </v-col>
               </v-container>
 
-              <v-flex class="pa-4">
+              <v-col class="pa-4">
                 <v-switch
                   v-model="furniture"
                   :label="$t('report.furniture', {state: $t(`boolean.${furniture}`)})"
                 />
 
-                <v-flex
-                  xs12
-                  sm8
+                <v-col
+                  cols="12"
+                  sm="8"
                 >
-                  <v-layout
-                    row
-                    wrap
-                    justify-space-around
+                  <v-row
+                    
+                    
+                    justify="space-around"
                   >
                     <v-btn
                       large
-                      round
+                      rounded
                       color="error"
                       @click="reset"
                     >
@@ -390,21 +401,21 @@
 
                     <v-btn
                       large
-                      round
+                      rounded
                       color="primary"
                       :loading="submitting"
                       @click="submit"
                     >
                       {{ $t('report.submit') }}
                     </v-btn>
-                  </v-layout>
-                </v-flex>
-              </v-flex>
+                  </v-row>
+                </v-col>
+              </v-col>
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
     <!-- TODO: refactor dialog code -->
     <v-dialog
       v-model="showLimitationAlert"
@@ -444,7 +455,7 @@
         <v-card-actions>
           <v-btn
             color="primary"
-            flat
+            text
             @click="showLimitationAlert = false"
           >
             {{ $t('dialog.cancel') }}
@@ -452,7 +463,7 @@
           <v-spacer />
           <v-btn
             color="error"
-            flat
+            text
             @click="confirmSubmit"
           >
             {{ $t('dialog.confirm') }}
@@ -481,7 +492,7 @@
         <v-card-actions>
           <v-btn
             color="primary"
-            flat
+            text
             @click="showLimitationRepeatAlert = false"
           >
             {{ $t('dialog.cancel') }}
@@ -489,7 +500,7 @@
           <v-spacer />
           <v-btn
             color="error"
-            flat
+            text
             @click="confirmFinalSubmit"
           >
             {{ $t('dialog.confirm') }}
