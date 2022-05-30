@@ -1,14 +1,47 @@
-const client = {
-  source: "frontend-v2",
-  version: "v1.1.1"
-};
+const version = (() => NPM_PACKAGE_VERSION)();
+const project = "frontend-v2";
 
-export default {
-  version: client.version,
+module.exports = {
+  version,
+  project,
   api: {
-    submitParams: client
+    submitParams: {
+      source: project,
+      version,
+    },
+  },
+  authorization: {
+    userId: {
+      cookieKey: "userID",
+    },
   },
   cdn: {
-    global: "https://penguin-stats.s3.ap-southeast-1.amazonaws.com"
-  }
-}
+    cn: "https://penguin.upyun.galvincdn.com",
+    global: "https://penguin-stats.s3.amazonaws.com",
+  },
+  advancedQuery: {
+    maxQueries: 5,
+  },
+  randomBackground: {
+    limit: 3,
+    max: 446,
+  },
+  previewCard: {
+    item: {
+      pagination: 5,
+    },
+  },
+  probe: {
+    endpoint: {
+      prod: {
+        ws: "wss://probe.penguin-stats.io/",
+        legacy: "https://probe.penguin-stats.io/",
+      },
+      dev: {
+        ws: "ws://localhost:8100/",
+        legacy: "http://localhost:8100/",
+      },
+    },
+    uidExpiration: 1000 * 60 * 24 * 180,
+  },
+};

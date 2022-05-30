@@ -1,125 +1,200 @@
 <template>
-  <v-container>
-    <v-row dense>
-      <v-col cols="12">
-        <Intro data-aos="fade" />
-      </v-col>
+  <v-container
+    fluid
+    class="fill-height justify-center"
+  >
+    <v-row
+      align="center"
+      :dense="$vuetify.breakpoint.mdAndDown"
+      class="mx-0"
+    >
       <v-col
         cols="12"
+        lg="6"
+        xl="7"
+      >
+        <Intro
+          class="card-translate-up"
+        />
+      </v-col>
+
+      <v-col
+        cols="12"
+        lg="6"
+        xl="5"
       >
         <Bulletin
-          data-aos="fade"
-          data-aos-offset="50"
-          class="animation-blink"
+          class="card-translate-up"
+        />
+        <SiteStatsOverview class="card-translate-up" />
+        <!--        <Mew class="card-translate-up" />-->
+      </v-col>
+
+      <!--      <v-col-->
+      <!--        cols="12"-->
+      <!--      >-->
+      <!--        <Banner class="card-translate-up" />-->
+      <!--      </v-col>-->
+
+      <!--      <v-col-->
+      <!--        cols="12"-->
+      <!--      >-->
+      <!--        <Banner class="card-translate-up" />-->
+      <!--      </v-col>-->
+
+      <v-col
+        cols="12"
+        lg="6"
+        class="align-self-stretch"
+      >
+        <HomeSearch
+          :autofocus="false"
+          class="card-fade-appear align-self-stretch fill-height"
         />
       </v-col>
-      <!--      <v-flex-->
-      <!--        xs12-->
-      <!--        sm6-->
-      <!--      >-->
-      <!--        <Contact-->
-      <!--          data-aos="fade"-->
-      <!--        />-->
-      <!--      </v-flex>-->
+
+      <v-col
+        cols="12"
+        lg="6"
+        class="align-self-stretch"
+      >
+        <GettingStarted
+          class="card-translate-up align-self-stretch"
+        />
+      </v-col>
+
       <v-col
         cols="12"
         md="6"
+        class="align-self-stretch"
       >
         <Contribute
-          data-aos="fade"
-          data-aos-offset="50"
-        />
-        <Contact
-          class="mt-2"
-          data-aos="fade"
-          data-aos-offset="50"
+          class="card-translate-up align-self-stretch"
         />
       </v-col>
       <v-col
         cols="12"
         md="6"
+        class="align-self-stretch"
       >
         <Donate
-          data-aos="fade"
-          data-aos-offset="50"
+          hide
+          class="card-translate-up fill-height"
         />
+      </v-col>
+      <v-col
+        cols="12"
+        md="6"
+        class="align-self-stretch"
+      >
+        <Contact class="card-translate-up align-self-stretch" />
+      </v-col>
+      <v-col
+        cols="12"
+        md="6"
+        class="align-self-stretch"
+      >
+        <License class="card-translate-up" />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import Contribute from "@/views/About/Contribute";
-import Donate from "@/views/About/Donate";
-import Intro from "@/views/About/Intro";
-import Bulletin from "@/views/About/Bulletin";
-import Contact from "@/views/About/Contact";
+import Contribute from '@/views/About/Contribute'
+import Donate from '@/views/About/Donate'
+import Intro from '@/views/About/Intro'
+import Bulletin from '@/views/About/Bulletin'
+import Contact from '@/views/About/Contact'
+import anime from 'animejs'
+import License from '@/views/About/License'
+import Console from '@/utils/Console'
+import GettingStarted from '@/views/About/GettingStarted'
+import SiteStatsOverview from '@/components/stats/SiteStatsOverview'
+import HomeSearch from '@/views/About/HomeSearch'
+
 export default {
-  name: "Home",
-  components: { Contribute, Donate, Intro, Bulletin, Contact },
+  name: 'Home',
+  components: {
+    HomeSearch,
+    SiteStatsOverview,
+    GettingStarted,
+    License,
+    Contribute,
+    Donate,
+    Intro,
+    Bulletin,
+    Contact
+  },
   data: () => ({}),
-  methods: {
-    goToPage(name) {
-      this.$router.push({ name: name })
-    }
+  mounted () {
+    setTimeout(() => {
+      try {
+        anime({
+          targets: '.card-translate-up',
+          translateY: [48, 0],
+          opacity: [0, 1],
+          duration: 625,
+          delay: anime.stagger(75),
+          easing: 'easeOutQuint'
+        })
+        anime({
+          targets: ['.card-translate-up h1', '.card-translate-up h2', '.card-translate-up p'],
+          translateY: [48, 0],
+          opacity: [0, 1],
+          duration: 625,
+          delay: anime.stagger(25),
+          easing: 'easeOutQuint'
+        })
+        anime({
+          targets: ['.card-fade-appear'],
+          scaleY: [1.1, 1],
+          duration: 325,
+          easing: 'easeOutQuint'
+        })
+      } catch (e) {
+        Console.warn('HomeAnimation', 'error when animating home entry animation', e)
+      }
+    }, 0)
+
+    // this.$nextTick(() => {
+    //   setTimeout(() => {
+    //     const el1 = document.querySelector(".card-translate-up");
+    //     const el2 = document.querySelector(".card-translate-up h1");
+    //     if ((el1 && el1.style.opacity === "0") || (el2 && el2.style.opacity === "0")) {
+    //       Console.info("HomeAnimation", "potential blank screen on home detected");
+    //
+    //       // try to fix this
+    //       const selectors = [
+    //         ".card-translate-up",
+    //         ".card-translate-up h1",
+    //         ".card-translate-up h2",
+    //         ".card-translate-up p",
+    //         ".card-translate-up span:not(.v-btn__content)",
+    //       ];
+    //       try {
+    //         for (const selector of selectors) {
+    //           for (const element of document.querySelectorAll(selector)) {
+    //             element.style.setProperty("opacity", 1);
+    //             element.style.setProperty("transform", "none");
+    //           }
+    //         }
+    //       } catch (e) {
+    //         Console.info("HomeAnimation", "blank screen fix trial failed", e)
+    //       }
+    //     }
+    //   }, 5000)
+    //
+    // })
   }
-};
+}
 </script>
 
 <style scoped>
 .home-card {
   height: 100%;
 }
-
-.animation-blink {
-  animation-play-state: running;
-}
-
-.animation-blink:hover{
-  animation-play-state: paused;
-}
-
-.theme--light .animation-blink {
-  background: repeating-linear-gradient(
-      -45deg,
-      rgba(240, 240, 240, 0.95),
-      rgba(240, 240, 240, 0.95) 45px,
-      rgba(255, 255, 255, 0.9) 45px,
-      rgba(255, 255, 255, 0.9) 90px
-  ) !important;
-  animation: light-blink 3s infinite alternate ease-in-out;
-}
-
-.theme--dark .animation-blink {
-  background: repeating-linear-gradient(
-      -45deg,
-      rgba(81, 81, 81, 0.95),
-      rgba(81, 81, 81, 0.95) 45px,
-      rgba(66, 66, 66, 0.9) 45px,
-      rgba(66, 66, 66, 0.9) 90px
-  ) !important;
-  animation: dark-blink 3s infinite alternate ease-in-out;
-}
-
-@keyframes light-blink {
-  from {
-    text-shadow: 0 0 0 rgba(0, 0, 0, .2);
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);;
+  .card-translate-up {
+    transition: box-shadow 225ms ease-out;
   }
-  to {
-    text-shadow: 0 0 5px rgba(0, 0, 0, .2);
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, .5), 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);;
-  }
-}
-
-@keyframes dark-blink {
-  from {
-    text-shadow: 0 0 0 rgba(255, 255, 255, .3);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, .5), 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);;
-  }
-  to {
-    text-shadow: 0 0 5px rgba(255, 255, 255, .3);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, .5), 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);;
-  }
-}
 </style>

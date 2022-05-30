@@ -1,0 +1,2 @@
+import './DoYouKnow'
+import './SearchResult'

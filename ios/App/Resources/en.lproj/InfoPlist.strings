@@ -1,0 +1,17 @@
+/* 
+  InfoPlist.strings
+  App
+
+  Created by Galvin Gao on 2020/9/28.
+  
+*/
+
+"CFBundleDisplayName" = "Penguin Stats";
+"CFBundleName" = "Penguin Statistics";
+
+"SHORTCUT_ITEM_SEARCH_TITLE" = "Search";
+"SHORTCUT_ITEM_SEARCH_SUBTITLE" = "Navigate to Search page";
+//"SHORTCUT_ITEM_DATE_TITLE" = "Rewinding Breeze";
+//"SHORTCUT_ITEM_DATE_SUBTITLE" = "View event data";
+//"SHORTCUT_ITEM_AUTO_TITLE" = "Automatic Reporting";
+//"SHORTCUT_ITEM_AUTO_SUBTITLE" = "Configurate & Start...";

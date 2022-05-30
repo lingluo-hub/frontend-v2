@@ -1,163 +1,122 @@
 <template>
   <v-app
-    id="__app_root"
-    :dark="dark"
+    :class="appEnvironment"
   >
-    <RandomBackground />
+    <ServerNotifyOverlay />
+    <ModuleLoadingOverlay v-if="!environment.isApp" />
+    <UpgradeNotifier />
+    <GlobalSnackbar />
+    <MirrorSelector />
     <v-navigation-drawer
       v-model="drawer"
       app
-      style="max-height: calc(100vh - 36.76px)"
-      width="300"
+      :style="{'filter': isInSpecialUI ? 'grayscale(1)' : ''}"
+      class="safe-area--navigation-drawer"
+      width="300px"
     >
-      <div 
-        :class="{
-          'drawer-logo blue': true,
-          'darken-4': dark,
-          'darken-3': !dark
-        }"
-      >
-        <v-img
-          :src="require('@/assets/logo.png')"
-          aspect-ratio="1"
-          height="192px"
-          contain
-        />
-        <div class="white--text description">
-          <v-row
-            align="center"
-            justify="center"
-          >
-            <span>{{ $t('app.name_line1') }}</span>
-            <span>{{ $t('app.name_line2') }}</span>
-          </v-row>
-        </div>
-      </div>
+      <Logo />
       <v-list
         dense
         nav
+        expand
+        class="safe-area--navigation"
       >
-        <template
+        <GlobalSearchNavigation />
+
+        <Navigation
           v-for="route in routes"
-        >
-          <v-list-item
-            v-if="!route.children || route.meta.forceSingle"
-            :key="route.name"
-            :class="route.path === $route.path ? 'v-list-item--active' : ''"
-            @click="onMenuItemClicked(route)"
-          >
-            <v-list-item-icon>
-              <v-icon v-text="route.meta.icon" />
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title>
-                {{ $t(route.meta.i18n) }} &nbsp; <v-icon
-                  v-if="!route.component && !route.meta.forceSingle"
-                  small
-                >
-                  mdi-open-in-new
-                </v-icon>
-              </v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-group
-            v-else
-            :key="route.name"
-            :value="route.meta.active"
-            :prepend-icon="route.meta.icon"
-            color="grey"
-            no-action
-          >
-            <template v-slot:activator>
-              <v-list-item-title>{{ $t(route.meta.i18n) }}</v-list-item-title>
-            </template>
+          :key="route.name"
+          :route="route"
+        />
 
-            <v-list-item
-              v-for="child in route.children.filter(el => !el.meta.hide)"
-              :key="child.name"
-              :class="child.path === $route.path.split('/')[2] ? 'v-list-item--active' : ''"
-              @click="onMenuItemClicked(child)"
-            >
-              <v-list-item-title>{{ $t(child.meta.i18n) }}</v-list-item-title>
+        <v-divider class="mt-2 mb-1" />
 
-              <v-list-item-icon>
-                <v-icon v-text="child.meta.icon" />
-              </v-list-item-icon>
-            </v-list-item>
-          </v-list-group>
-        </template>
-
-        <v-divider class="my-2" />
-
-        <v-container>
+        <v-container style="margin-bottom: 360px">
           <v-row
-            justify="end"
+            justify="space-around"
           >
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  icon
-                  class="mx-1"
-                  v-on="on"
-                  @click="refreshData"
-                >
-                  <v-icon>mdi-database-refresh</v-icon>
-                </v-btn>
-              </template>
-              <span>{{ $t('menu.refreshData') }}</span>
-            </v-tooltip>
-            
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  icon
-                  class="mx-1"
-                  v-on="on"
-                  @click="dark = !dark"
-                >
-                  <v-icon>mdi-invert-colors</v-icon>
-                </v-btn>
-              </template>
-              <span>{{ $t('menu.invertColors') }}</span>
-            </v-tooltip>
-            
-            <v-menu
-              bottom
-              left
-              open-on-hover
-              transition="slide-y-transition"
+            <v-btn
+              v-haptic
+              outlined
+              text
+              class="flex-grow-1 mr-1"
+              :loading="pending"
+              @click="refreshData"
             >
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  icon
-                  class="mx-1"
-                  v-on="on"
-                >
-                  <v-icon>mdi-translate</v-icon>
-                </v-btn>
-              </template>
+              <v-icon left>
+                mdi-database-refresh
+              </v-icon>
+              {{ $t('menu.refreshData') }}
+            </v-btn>
 
-              <v-list>
-                <v-list-item
-                  v-for="(locale, i) in localizations"
-                  :key="i"
-                  @click="changeLocale(locale.id)"
-                >
-                  <v-list-item-title>{{ locale.name }}</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
+            <SettingsDialog />
+          </v-row>
+          <v-row
+            justify="center"
+            class="mt-2"
+          >
+            <v-expand-transition>
+              <div
+                v-if="lowData"
+                class="text-center overline"
+              >
+                {{ $t('settings.optimization.lowData.active') }}
+              </div>
+            </v-expand-transition>
           </v-row>
         </v-container>
       </v-list>
+
+      <template v-if="$store.state.ui.activeThemeStyle === 'miku2021'">
+        <v-img
+          :src="cdnDeliver('/images/themes/miku2021/portrait.png')"
+          style="position: absolute; bottom: 0; z-index: 0"
+          position="bottom right"
+          height="calc(250px + 10vh)"
+          width="100%"
+          :aspect-ratio="1"
+          class="v-image--fade-down fallthrough"
+        />
+
+        <v-theme-provider dark>
+          <v-hover>
+            <template #default="{ hover }">
+              <div
+                style="position: absolute; width: 100%; height: 48px; bottom: 0; right: 0; z-index: 0; user-select: none; background: linear-gradient(to top, #39c5bb, rgba(57,197,187, 0)); text-shadow: 0 0 4px rgba(0, 0, 0, .5)"
+                class="d-flex align-center justify-center text-center overline cursor-default"
+              >
+                <span class="d-flex flex-row align-center justify-center white--text pt-1">
+                  <v-slide-x-reverse-transition>
+                    <span
+                      v-if="hover"
+                      class="degraded-opacity"
+                    >❤</span>
+                  </v-slide-x-reverse-transition>
+                  <span class="mx-1">{{ $t('specials.mikubirthday2021.caption') }}</span>
+                  <v-slide-x-transition>
+                    <span
+                      v-if="hover"
+                      class="degraded-opacity"
+                    >❤</span>
+                  </v-slide-x-transition>
+                </span>
+              </div>
+            </template>
+          </v-hover>
+        </v-theme-provider>
+      </template>
     </v-navigation-drawer>
     <v-app-bar
+      id="penguin-toolbar"
+      elevate-on-scroll
       app
-      fixed
       dark
-      color="blue darken-3"
+      color="primary darken-1"
+      :style="{'filter': isInSpecialUI ? 'grayscale(1)' : ''}"
+      class="x--safe-area toolbar--safe-area flex-column transition-all overflow-hidden"
     >
       <v-app-bar-nav-icon
+        v-haptic
         @click.stop="drawer = !drawer"
       />
 
@@ -176,17 +135,30 @@
             />
           </v-avatar>
         </transition>
-        <span class="title">
-          {{ $t($router.currentRoute.meta.i18n) }}
+        <span class="title force-lang-font">
+          {{ $t($route.meta.i18n) }}
         </span>
       </v-toolbar-title>
 
       <v-spacer />
 
+      <ServerSelector />
+
       <AccountManager />
+
+      <!--      <v-progress-linear-->
+      <!--        :active="pending"-->
+      <!--        :indeterminate="pending"-->
+      <!--        absolute-->
+      <!--        bottom-->
+      <!--        class="width: 100%"-->
+      <!--        color="deep-purple accent-4"-->
+      <!--      />-->
     </v-app-bar>
+    <RandomBackground />
     <v-content
-      class="mb-8"
+      :style="{'filter': isInSpecialUI ? 'grayscale(1)' : ''}"
+      class="safe-area--v-content"
     >
       <transition
         name="slide-fade"
@@ -194,323 +166,85 @@
       >
         <router-view />
       </transition>
+      <Footer v-if="!environment.isApp" />
     </v-content>
-    <v-footer
-      app
-      color="blue darken-3"
-      class="white--text px-4"
-    >
-      <v-dialog
-        v-model="showLicenseDialog"
-        width="500"
-        origin="bottom left"
-      >
-        <template v-slot:activator="{ on }">
-          <span
-            class="cursor-pointer"
-            v-on="on"
-          >
-            <v-avatar
-              size="24"
-              class="mr-1"
-            >
-              <v-img
-                :src="require('@/assets/ccIcon/cc.svg')"
-                alt="Creative Commons - Logo"
-              />
-            </v-avatar>
-            <v-avatar
-              size="24"
-              class="mr-1"
-            >
-              <v-img
-                :src="require('@/assets/ccIcon/by.svg')"
-                alt="Creative Commons - BY"
-              />
-            </v-avatar>
-            <v-avatar
-              size="24"
-            >
-              <v-img
-                :src="require('@/assets/ccIcon/nc.svg')"
-                alt="Creative Commons - Non-commercial"
-              />
-            </v-avatar>
-          </span>
-        </template>
-
-        <v-card>
-          <v-card-title
-            class="headline primary lighten-1"
-          >
-            <v-avatar
-              size="24"
-              class="mr-2"
-            >
-              <v-img
-                :src="require('@/assets/ccIcon/cc.svg')"
-                alt="Creative Commons - Logo"
-              />
-            </v-avatar>
-            {{ $t('meta.footer.copyright.title') }}
-          </v-card-title>
-
-          <v-card-text class="mt-2 body-1">
-            {{ $t('meta.footer.copyright.content') }}
-          </v-card-text>
-
-          <v-divider />
-
-          <v-card-actions>
-            <v-spacer />
-            <v-btn
-              text
-              href="https://creativecommons.org/licenses/by-nc/4.0/"
-              target="_blank"
-            >
-              <v-icon left>
-                mdi-eye
-              </v-icon>
-              {{ $t('meta.details') }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-spacer />
-      <NetworkStateIndicator />
-    </v-footer>
+    <NetworkStateIndicator />
   </v-app>
 </template>
 
 <script>
-  import RandomBackground from '@/components/global/RandomBackground'
-  import AccountManager from '@/components/toolbar/AccountManager'
-  import NetworkStateIndicator from "@/components/toolbar/NetworkStateIndicator";
-  import Console from "@/utils/Console";
-  import strings from "@/utils/strings";
-  import config from "@/config";
+import RandomBackground from '@/components/global/RandomBackground'
+import GlobalSnackbar from '@/components/global/GlobalSnackbar'
+
+import AccountManager from '@/components/toolbar/AccountManager'
+import NetworkStateIndicator from '@/components/toolbar/NetworkStateIndicator'
+
+import Navigation from '@/components/drawer/Navigation'
+
+import GlobalEntry from '@/mixins/hooks/GlobalEntry'
+
+import './styles/global.css'
+import './styles/modules.scss'
+import './styles/fonts.css'
+import './styles/theme-adapt.scss'
+import Footer from '@/components/global/Footer'
+import CDN from '@/mixins/CDN'
+import Mirror from '@/mixins/Mirror'
+import SpecialUI from '@/mixins/SpecialUI'
+import SettingsDialog from '@/components/drawer/SettingsDialog'
+import MirrorSelector from '@/components/global/MirrorSelector'
+import Logo from '@/components/drawer/Logo'
+import { mapGetters } from 'vuex'
+import UpgradeNotifier from '@/components/global/UpgradeNotifier'
+import ServerSelector from '@/components/toolbar/ServerSelector'
+import ServerNotifyOverlay from '@/components/global/ServerNotifyOverlay'
+import GlobalSearchNavigation from '@/components/search/GlobalSearchNavigation'
+import ModuleLoadingOverlay from '@/components/global/ModuleLoadingOverlay'
+import Environment from '@/mixins/Environment'
+import Cookies from 'js-cookie'
 
 export default {
   name: 'App',
   components: {
+    ModuleLoadingOverlay,
+    GlobalSearchNavigation,
+    ServerNotifyOverlay,
+    ServerSelector,
+    UpgradeNotifier,
+    Logo,
+    MirrorSelector,
+    SettingsDialog,
+    Footer,
+    Navigation,
+    GlobalSnackbar,
     NetworkStateIndicator,
     RandomBackground,
     AccountManager
   },
+  mixins: [GlobalEntry, CDN, Mirror, SpecialUI, Environment],
   data () {
     return {
       routes: [],
-      randomizedLogo: "",
-      localizations: [
-        {
-          id: 'zh',
-          name: '中文'
-        }, {
-          id: 'en',
-          name: 'English'
-        }, {
-          id: 'ja',
-          name: '日本語'
-        }
-      ],
-      prefetchingResources: false,
       drawer: !this.$vuetify.breakpoint.xsOnly,
       showLicenseDialog: false
     }
   },
   computed: {
-    dark: {
-      get () {
-        return this.$store.state.settings.dark
-      },
-      set (value) {
-        this.$store.commit('switchDark', value)
-        this.$vuetify.theme.dark = value
-      }
-    }
+    ...mapGetters('settings', ['lowData']),
+    ...mapGetters('ajax', ['pending'])
   },
-  watch: {
-    '$route': [
-      'randomizeLogo',
-      'logRouteEvent'
-    ],
-    'dark': ['onDarkChange']
-  },
-  beforeMount() {
-    this.routes = this.$router.options.routes.filter(el => !(el.meta.hide));
-    this.$store.dispatch("fetchData", false)
-  },
-  mounted () {
-    this.randomizeLogo();
-    this.onDarkChange(this.$store.state.settings.dark);
-
-    if (this.$store.getters.language) {
-      this.changeLocale(this.$store.getters.language, false)
-    } else {
-      const language = strings.getFirstBrowserLanguage();
-      Console.debug("[i18n] detected language", language);
-      if (language) {
-        // because this is a detection result, thus we are not storing it,
-        // unless the user manually set one.
-        this.changeLocale(language, false)
-      }
-    }
-
-    if (this.$store.state.settings.dark) {
-      this.$vuetify.theme.dark = this.$store.state.settings.dark
+  created () {
+    this.routes = this.$router.options.routes.filter(el => !el.meta.hide)
+    this.$store.dispatch('data/fetch', false)
+    if (Cookies.get('userID')) {
+      this.$store.dispatch('user/login', Cookies.get('userID'))
+      Cookies.remove('userID')
     }
   },
   methods: {
     async refreshData () {
-      await this.$store.dispatch("fetchData", true);
-    },
-    onDarkChange (newValue) {
-      if (newValue) {
-        document.body.style.backgroundColor = "#303030"
-      } else {
-        document.body.style.backgroundColor = "#fafafa"
-      }
-    },
-
-    onMenuItemClicked (route) {
-      if (route.meta && route.meta.externalRedirect) {
-        if (route.meta.ga) {
-          let ga = route.meta.ga;
-          this.$ga.event(
-            ga.category || 'redirect',
-            ga.action || 'links',
-            ga.label || 'unknown',
-            ga.value || 1);
-        }
-        if (route.meta.link) {
-          window.open(route.meta.link);
-        }
-      } else {
-        this.$router.push({'name': route.name})
-      }
-    },
-    randomizeLogo () {
-      const random = Math.random();
-      function imageUrl (character) {
-        return `${config.cdn.global}/logos/penguin_stats_logo_${character}.png`
-      }
-      this.randomizedLogo = random < .25 ? imageUrl("exia")
-        : random < .5 ? imageUrl("texas")
-          : random < .75 ? imageUrl("sora")
-            : imageUrl("croissant")
-    },
-    changeLocale (localeId, save=true) {
-      if (localeId !== this.$i18n.locale) {
-        Console.debug("[i18n] locale changed to:", localeId, "| saving to vuex:", save);
-        this.$i18n.locale = localeId;
-        // this.$vuetify.lang.current = localeId;
-        if (save) this.$store.commit("changeLocale", localeId);
-        document.title = `${this.$t(this.$route.meta.i18n) + ' | ' || ''}${this.$t('app.name')}`;
-      } else {
-        Console.debug("[i18n] Same locale");
-      }
-    },
-    logRouteEvent (newValue) {
-      if (newValue.name === "StatsByStage_Selected") {
-        // Console.log(this.$store.state.dataSource, newValue.params.stageId);
-        this.$ga.event('result', 'fetch_' + this.$store.state.dataSource, newValue.params.stageId, 1)
-      } else if (newValue.name === "StatsByItem_Selected") {
-        this.$ga.event('result', 'fetch_' + this.$store.state.dataSource, newValue.params.itemId, 1)
-      }
+      await this.$store.dispatch('data/fetch', true)
     }
   }
 }
 </script>
-
-<style>
-  .slide-fade-enter-active {
-    transition: all .225s cubic-bezier(0.165, 0.84, 0.44, 1);
-  }
-  .slide-fade-leave-active {
-    transition: all .125s cubic-bezier(0.165, 0.84, 0.44, 1);
-  }
-  .slide-fade-enter, .slide-fade-leave-to
-    /* .slide-fade-leave-active for below version 2.1.8 */ {
-    transform: translateY(1.5vh);
-    opacity: 0;
-  }
-
-  .theme--dark, .theme--light {
-    transition: all .3s cubic-bezier(.25,.8,.5,1) !important;
-  }
-
-  .drawer-logo {
-    height: 256px;
-    padding: 32px;
-    overflow: hidden;
-    transition: all .5s cubic-bezier(0.19, 1, 0.22, 1);
-  }
-
-  .drawer-logo:hover {
-    height: 320px;
-    padding: 32px;
-  }
-
-  .drawer-logo > .description {
-    margin-top: 16px;
-    text-align: center;
-    line-height: 36px;
-    font-size: 24px;
-    opacity: 0;
-    transition: all .5s cubic-bezier(0.19, 1, 0.22, 1);
-  }
-
-  .drawer-logo:hover > .description {
-    opacity: 1;
-  }
-
-  .randomizedLogo > .v-image__image {
-    transition: background .5s cubic-bezier(0.19, 1, 0.22, 1);
-  }
-
-  .theme--light .bkop-light {
-    background: rgba(255, 255, 255, .75) !important;
-  }
-
-  .theme--dark .bkop-light {
-    background: rgba(66, 66, 66, .85) !important;
-  }
-
-  .theme--light .bkop-medium {
-    background: rgba(255, 255, 255, .9) !important;
-  }
-
-  .theme--dark .bkop-medium {
-    background: rgba(66, 66, 66, .9) !important;
-  }
-
-  .cursor-pointer {
-    cursor: pointer;
-  }
-
-  .transparentTable > .v-table__overflow > .v-table {
-    background: transparent;
-  }
-
-  .v-navigation-drawer::-webkit-scrollbar {
-    width: 2px;
-  }
-
-  .v-navigation-drawer::-webkit-scrollbar-thumb {
-    background-color: rgb(200, 200, 200);
-  }
-
-  /*.v-toolbar {*/
-  /*  padding-top: env(safe-area-inset-top);*/
-  /*}*/
-
-  /*.v-footer {*/
-  /*  height: calc(32px + env(safe-area-inset-bottom)) !important;*/
-  /*  padding-bottom: calc(env(safe-area-inset-bottom));*/
-  /*}*/
-
-  .no-wrap--text {
-    word-break: break-word;
-  }
-
-</style>

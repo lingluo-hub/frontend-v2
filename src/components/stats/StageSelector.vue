@@ -1,122 +1,205 @@
-<i18n>
-  {
-    "zh": {
-      "opensAt": "开放时间：{0} - {1}",
-      "zone": {
-        "name": "章节",
-        "types": {
-          "MAINLINE": "主线",
-          "WEEKLY": "物资筹备",
-          "ACTIVITY_OPEN": "限时活动（开放中）",
-          "ACTIVITY_CLOSED": "限时活动（已结束）"
-        },
-        "status": {
-          "closed": "已结束",
-          "open": "开放中"
-        }
-      },
-      "stage": {
-        "name": "关卡",
-        "apCost": "{apCost} 点理智",
-        "loots": {
-          "normal": "常规掉落",
-          "extra": "额外物资",
-          "special": "特殊掉落"
-        }
-      }
-    },
-    "en": {
-      "opensAt": "Opens at: {0} - {1}",
-      "zone": {
-        "name": "Zone",
-        "types": {
-          "MAINLINE": "Mainline",
-          "WEEKLY": "Weekly",
-          "ACTIVITY_OPEN": "Event (Opening)",
-          "ACTIVITY_CLOSED": "Event (Closed)"
-        },
-        "status": {
-          "closed": "Closed",
-          "open": "Opening"
-        }
-      },
-      "stage": {
-        "name": "Stage",
-        "apCost": "{apCost} AP required",
-        "loots": {
-          "normal": "Normal",
-          "extra": "Extra",
-          "special": "Special"
-        }
-      }
-    },
-    "ja": {
-      "opensAt": "開催期間：{0} - {1}",
-      "zone": {
-        "name": "章",
-        "types": {
-          "MAINLINE": "メインストーリー",
-          "WEEKLY": "曜日クエスト",
-          "ACTIVITY_OPEN": "イベント（開催中）",
-          "ACTIVITY_CLOSED": "イベント（終了）"
-        },
-        "status": {
-          "closed": "終了",
-          "open": "開催中"
-        }
-      },
-      "stage": {
-        "name": "作戦",
-        "apCost": "消費理性：{apCost}",
-        "loots": {
-          "normal": "通常ドロップ",
-          "extra": "エクストラドロップ",
-          "special": "スペシャルドロップ"
-        }
-      }
-    }
-  }
-</i18n>
-
 <template>
   <v-stepper
     v-model="step"
-    :alt-labels="!small"
-    class="pa-2 transparent elevation-0 full-width"
+    alt-labels
+    class="transparent elevation-0 full-width pa-md-2 pa-lg-4 pa-xl-4"
   >
     <v-stepper-header
-      class="bkop-light elevation-6"
+      class="bkop-light elevation-4 py-4 px-5 d-flex flex-row position-relative align-center"
       style="border-radius: 4px"
     >
-      <v-stepper-step
-        :complete="step > 1"
-        :editable="step > 1"
-        :step="1"
-      >
-        {{ $t('zone.name') }} & {{ $t('stage.name') }}
-        <small
-          v-if="step > 1"
-          class="mt-2"
+      <v-fade-transition>
+        <v-img
+          v-if="currentStageImage"
+          key="exact"
+          :src="currentStageImage"
+          class="stepper-header--background"
+          :gradient="dark ? '160deg, rgba(0, 0, 0, .95), rgba(0, 0, 0, .4)' : '160deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, .4)'"
+
+          style="filter: brightness(0.8)"
+        />
+
+        <v-img
+          v-else
+          key="default"
+          :src="stageImages._default"
+          class="stepper-header--background stepper-header--background__animated"
+          position=""
         >
-          {{ selectedStage.code || '' }}
-        </small>
-      </v-stepper-step>
+          <v-overlay
+            absolute
+            opacity="0"
+            :style="{'background': dark ? 'linear-gradient(150deg, rgba(0, 0, 0, .95), rgba(0, 0, 0, 0))' : 'linear-gradient(150deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0))'}"
+          />
+        </v-img>
+      </v-fade-transition>
 
-      <v-divider />
+      <BackButton
+        :name="$t('stage.selector.title')"
+        :active="step > 1"
+        @back="step = 1"
+      />
 
-      <v-stepper-step
-        :complete="step === 2"
-        :step="2"
-      >
-        {{ name }}
-      </v-stepper-step>
+      <v-spacer />
+
+      <v-slide-x-transition>
+        <div
+          v-if="step === 2"
+          class="d-flex flex-row"
+        >
+          <v-slide-x-transition hide-on-leave>
+            <StageCard
+              v-if="relativeStages.prev"
+              key="left"
+              v-haptic
+
+              left
+              :dense="$vuetify.breakpoint.xsOnly"
+              :stage="relativeStages.prev"
+              @click.native="selectStage(relativeStages.prev.zoneId, relativeStages.prev.stageId, false)"
+            />
+          </v-slide-x-transition>
+
+          <v-slide-x-reverse-transition hide-on-leave>
+            <StageCard
+              v-if="relativeStages.next"
+              key="right"
+              v-haptic
+
+              right
+              :dense="$vuetify.breakpoint.xsOnly"
+              :stage="relativeStages.next"
+              @click.native="selectStage(relativeStages.next.zoneId, relativeStages.next.stageId, false)"
+            />
+          </v-slide-x-reverse-transition>
+        </div>
+      </v-slide-x-transition>
+
+      <!--      <v-expand-transition>-->
+      <!--        <div-->
+      <!--          v-if="step === 2"-->
+      <!--          class="d-flex flex-column align-start justify-center"-->
+      <!--        >-->
+      <!--          <h2 class="title">-->
+      <!--            {{ name }}-->
+      <!--          </h2>-->
+
+      <!--          <span class="subtitle-1">-->
+      <!--            {{ strings.translate(selectedStage, "code") }}-->
+      <!--          </span>-->
+      <!--        </div>-->
+      <!--      </v-expand-transition>-->
     </v-stepper-header>
     <v-stepper-items>
       <v-stepper-content
         :step="1"
-        :class="{'pa-0': small}"
+        :class="{'pa-0': small, 'pa-2': !small}"
       >
         <v-row class="px-1">
+          <v-col
+            cols="12"
+            :class="{'pb-0': !preferencedStages.haveAny}"
+          >
+            <v-subheader>
+              <v-icon
+                class="mr-2"
+                :color="preferencedStages.haveAny ? '' : 'grey'"
+              >
+                mdi-chevron-double-right
+              </v-icon>
+              <span>
+                {{ preferencedStages.haveAny ? $t('stage.actions._name.selector') : $t('stage.actions._name.selectorEmpty') }}
+              </span>
+            </v-subheader>
+
+            <v-card
+              v-if="preferencedStages.haveAny"
+              class="bkop-light"
+            >
+              <v-row>
+                <v-col
+                  cols="12"
+                  md="6"
+                >
+                  <v-card-title class="pt-2 subtitle-1">
+                    <v-icon left>
+                      mdi-star
+                    </v-icon>
+                    {{ $t('stage.actions.star.name') }}
+                  </v-card-title>
+                  <v-card-text class="pb-2 px-6">
+                    <template v-if="preferencedStages.favorites.length">
+                      <StageCard
+                        v-for="stage in preferencedStages.favorites"
+                        :key="stage.stageId"
+                        v-haptic
+                        :stage="stage"
+
+                        @click.native="selectStage(stage.zoneId, stage.stageId)"
+                      />
+                    </template>
+
+                    <template v-else>
+                      <div
+                        v-for="text in $t('stage.actions.star.empty')"
+                        :key="text"
+                        class="caption text-left justify-center grey--text"
+                        v-text="text"
+                      />
+                    </template>
+                  </v-card-text>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  md="6"
+                >
+                  <v-card-title class="pt-2 subtitle-1">
+                    <v-icon left>
+                      mdi-history
+                    </v-icon>
+                    {{ $t('stage.actions.history.name') }}
+
+                    <v-spacer />
+                    <v-btn
+                      v-haptic.notification="'WARNING'"
+                      small
+                      text
+                      :disabled="!preferencedStages.histories.length"
+                      @click="$store.commit('stagePreferences/clearHistory')"
+                    >
+                      {{ $t('stage.actions.history.clear') }}
+                    </v-btn>
+                  </v-card-title>
+                  <v-card-text class="pb-2 px-6">
+                    <template v-if="preferencedStages.histories.length">
+                      <div class="history-stage-cards">
+                        <StageCard
+                          v-for="stage in preferencedStages.histories"
+                          :key="stage.stageId"
+                          v-haptic
+                          :stage="stage"
+
+                          @click.native="selectStage(stage.zoneId, stage.stageId)"
+                        />
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div
+                        v-for="text in $t('stage.actions.history.empty')"
+                        :key="text"
+                        class="caption text-left justify-center grey--text"
+                        v-text="text"
+                      />
+                    </template>
+                  </v-card-text>
+                </v-col>
+              </v-row>
+            </v-card>
+
+            <v-divider v-if="!preferencedStages.haveAny" />
+          </v-col>
+
           <v-col
             v-for="(categories, index) in categorizedZones"
             :key="index"
@@ -125,76 +208,14 @@
             md="6"
             lg="6"
             xl="6"
+            class="mt-n4"
           >
-            <div
+            <StageSelectorCategory
               v-for="category in categories"
               :key="category.id"
-            >
-              <v-subheader>
-                <v-icon class="mr-2">
-                  {{ category.zones[0].icon }}
-                </v-icon>
-                <span>
-                  {{ $t(['zone.types', category.id].join('.')) }}
-                </span>
-              </v-subheader>
-              <v-expansion-panels
-                hover
-                class="mb-2"
-              >
-                <v-expansion-panel
-                  v-for="zone in category.zones"
-                  :key="zone.zoneId"
-                  class="bkop-light"
-                >
-                  <v-expansion-panel-header class="overflow-hidden bkop-medium">
-                    <v-row align="center">
-                      <span
-                        v-if="zone.isActivity && !small"
-                        :class="{
-                          'text--darken-1 font-weight-bold ml-2 mr-1': true,
-                          'red--text': zone.isOutdated,
-                          'green--text': !zone.isOutdated }"
-                      >
-                        {{ zone.isOutdated ? $t('zone.status.closed') : $t('zone.status.open') }}
-                      </span>
-
-                      <span
-                        :class="{'subtitle-1 pl-2': true, 'text--darken-1 font-weight-bold': zone.isActivity && small, 'red--text': zone.isActivity && small && zone.isOutdated,
-                                 'green--text': zone.isActivity && small && !zone.isOutdated}"
-                      >
-                        {{ strings.translate(zone, "zoneName") }}
-                      </span>
-
-                      <!--                        <v-spacer />-->
-
-                      <!--                        <span class="font-weight-bold monospace mr-6">-->
-                      <!--                          <v-badge-->
-                      <!--                            inline-->
-                      <!--                            color="black"-->
-                      <!--                            :content="zone.stages.length"-->
-                      <!--                          />-->
-                      <!--                        </span>-->
-                    </v-row>
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content class="pt-2">
-                    <div
-                      v-if="zone.isActivity"
-                      class="caption mb-2 mt-1"
-                    >
-                      {{ $t('opensAt', zone.activityActiveTime) }}
-                    </div>
-                    <StageCard
-                      v-for="stage in getStages(zone.zoneId)"
-                      :key="stage.stageId"
-                      :stage="stage"
-
-                      @click.native="selectStage(zone.zoneId, stage.stageId)"
-                    />
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </div>
+              :category="category"
+              @select="e => selectStage(e.zoneId, e.stageId)"
+            />
           </v-col>
         </v-row>
       </v-stepper-content>
@@ -209,153 +230,294 @@
 </template>
 
 <script>
-  import get from "@/utils/getters";
-  import strings from "@/utils/strings";
-  import StageCard from "@/components/stats/StageCard";
-  import Console from "@/utils/Console";
+import get from '@/utils/getters'
+import strings from '@/utils/strings'
+import StageCard from '@/components/stats/StageCard'
+import Console from '@/utils/Console'
+import { mapGetters } from 'vuex'
+import CDN from '@/mixins/CDN'
+import existUtils from '@/utils/existUtils'
+import BackButton from '@/components/stats/BackButton'
+import Theme from '@/mixins/Theme'
+import StageSelectorCategory from "@/components/stats/StageSelectorCategory";
 
-  export default {
-    name: "StageSelector",
-    components: {StageCard},
-    props: {
-      name: {
-        type: String,
-        required: true
-      },
-      hideClosed: {
-        type: Boolean,
-        default () {
-          return false
+export default {
+  name: 'StageSelector',
+  components: {StageSelectorCategory, BackButton, StageCard },
+  mixins: [CDN, Theme],
+  props: {
+    name: {
+      type: String,
+      required: true
+    },
+    hideClosed: {
+      type: Boolean,
+      default () {
+        return false
+      }
+    },
+    routerNames: {
+      type: Object,
+      default () {
+        return {
+          index: '',
+          details: ''
         }
+      }
+    },
+    stage: {
+      type: String,
+      default () {
+        return ''
+      }
+    }
+  },
+  data () {
+    return {
+      internalStep: 1,
+      selected: {
+        zone: null,
+        stage: null
       },
-      routerNames: {
-        type: Object,
-        default () {
-          return {
-            index: "",
-            details: ""
+      stageImages: {
+        // 选择页面背景
+        _default: this.cdnDeliver('/backgrounds/zones/default.jpg')
+      },
+      activeTabs: {}
+    }
+  },
+  computed: {
+    ...mapGetters('settings', ['lowData']),
+    bindRouter () {
+      return this.routerNames.index !== '' && this.routerNames.details !== ''
+    },
+    step: {
+      get () {
+        return this.internalStep
+      },
+      set (val) {
+        this.internalStep = val
+        if (val === 1) this.$emit('select', { zone: null, stage: null })
+
+        if (!this.bindRouter) return
+        if (val === 1) {
+          this.$router.push({
+            name: this.routerNames.index
+          })
+        } else if (val === 2) {
+          this.$router.push({
+            name: this.routerNames.details,
+            params: {
+              zoneId: this.selected.zone,
+              stageId: this.selected.stage
+            }
+          })
+        }
+      }
+    },
+    strings () {
+      return strings
+    },
+    small () {
+      return this.$vuetify.breakpoint.smAndDown
+    },
+    categorizedZones () {
+      const categoriesSet = this.hideClosed
+        ? [ // Report
+          [
+            ['ACTIVITY_OPEN', 'ACTIVITY_PENDING', 'MAINLINE', 'ACTIVITY_PERMANENT'],
+            ['GACHABOX', 'WEEKLY']
+          ], // md, lg & xl
+          [
+            ['ACTIVITY_OPEN', 'ACTIVITY_PENDING', 'MAINLINE', 'ACTIVITY_PERMANENT'],
+            ['GACHABOX', 'WEEKLY']
+          ] // xs & sm
+        ]
+        : [ // Show Statistics
+          [
+            ['ACTIVITY_OPEN', 'ACTIVITY_PENDING', 'MAINLINE', 'ACTIVITY_PERMANENT'],
+            ['GACHABOX', 'ACTIVITY_CLOSED', 'WEEKLY']
+          ], // md, lg & xl
+          [
+            ['ACTIVITY_OPEN', 'ACTIVITY_PENDING', 'MAINLINE', 'ACTIVITY_PERMANENT'],
+            ['GACHABOX', 'ACTIVITY_CLOSED', 'WEEKLY']
+          ] // xs & sm
+        ]
+
+      const result = [[], []]
+      for (const [index, categories] of categoriesSet[this.small ? 1 : 0].entries()) {
+        for (const category of categories) {
+          let filter
+          let zones = get.zones.byType((category.startsWith('ACTIVITY') && category !== 'ACTIVITY_PERMANENT') ? 'ACTIVITY' : category, false)
+          zones = zones.filter(el => existUtils.existence(el))
+
+          if (category === 'ACTIVITY_OPEN') {
+            filter = zone => zone.timeValid === 0
+          } else if (category === 'ACTIVITY_CLOSED') {
+            filter = zone => zone.timeValid === 1
+          } else if (category === 'ACTIVITY_PENDING') {
+            filter = zone => zone.timeValid === -1
           }
-        }
-      }
-    },
-    data() {
-      return {
-        internalStep: 1,
-        selected: {
-          zone: null,
-          stage: null
-        }
-      }
-    },
-    computed: {
-      bindRouter () {
-        return this.routerNames.index !== "" && this.routerNames.details !== ""
-      },
-      step: {
-        get () {
-          return this.internalStep
-        },
-        set (val) {
-          this.internalStep = val;
-          if (val === 1) this.$emit("select", {zone: null, stage: null});
 
-          if (!this.bindRouter) return;
-          if (val === 1) {
-            this.$router.push({
-              name: this.routerNames.index
-            });
-          } else if (val === 2) {
-            this.$router.push({
-              name: this.routerNames.details,
-              params: {
-                zoneId: this.selected.zone,
-                stageId: this.selected.stage
+          if (filter) zones = zones.filter(filter)
+
+          zones = zones
+            .map(zone => {
+              let stages = get.stages.byParentZoneId(zone.zoneId)
+              if (this.hideClosed) {
+                stages = stages.filter(stage => !!stage.dropInfos)
+              }
+              stages = stages.filter(el => existUtils.existence(el))
+
+              return {
+                ...zone,
+                stages
+              }
+            })
+          // filter out empty zones
+            .filter(el => el.stages.length)
+
+          // sort activity zones by its openTime
+          if (category.startsWith('ACTIVITY') && category !== 'ACTIVITY_PERMANENT') {
+            const server = this.$store.getters['dataSource/server']
+            zones = zones
+              .slice()
+              .sort((a, b) => a.existence[server].openTime - b.existence[server].openTime)
+          }
+
+          if (this.lowData) {
+            zones = zones.map(el => {
+              return {
+                ...el,
+                background: null
               }
             })
           }
-        }
-      },
-      strings () {
-        return strings
-      },
-      small () {
-        return this.$vuetify.breakpoint.xsOnly
-      },
-      categorizedZones() {
-        const categories = ["ACTIVITY_OPEN", "MAINLINE", "WEEKLY"];
-        !this.hideClosed ? categories.push("ACTIVITY_CLOSED") : null;
-        let result = [];
-        for (let category of categories) {
-          let filter = null;
-          let zones = get.zones.byType(category.startsWith("ACTIVITY") ? "ACTIVITY" : category);
-          if (category === "ACTIVITY_OPEN") {
-            filter = zone => !zone.isOutdated;
-          } else if (category === "ACTIVITY_CLOSED") {
-            filter = zone => zone.isOutdated;
-          }
-          if (filter) {
-            zones = zones.filter(filter);
-          }
+
           if (zones && zones.length) {
-            result.push({
+            result[index].push({
               id: category,
               zones: zones
             })
           }
         }
-        result = [result.slice(0, -1), result.slice(-1)]
-        return result;
-      },
-      selectedStage() {
-        if (!this.selected.stage) return {};
-        return get.stages.byStageId(this.selected.stage);
-      },
-    },
-    watch: {
-      '$route' () {
-        this.checkRoute()
       }
+      return result
     },
-    beforeMount () {
-      this.checkRoute()
+    selectedZone () {
+      if (!this.selected.zone) return {}
+      return get.zones.byZoneId(this.selected.zone)
     },
-    methods: {
-      getStages (zoneId) {
-        return get.stages.byParentZoneId(zoneId);
-      },
-      selectStage (zone, stage) {
-        Console.log("chose", zone, stage);
-        this.selected.zone = zone;
-        this.selected.stage = stage;
-        this.$emit("select", {zone, stage});
-        this.step += 1
-      },
-      checkRoute () {
-        if (!this.bindRouter) return;
-        if (this.$route.name === this.routerNames.details) {
-          this.internalStep = 2;
-          const zone = this.$route.params.zoneId;
-          const stage = this.$route.params.stageId;
-          this.selected.zone = zone;
-          this.selected.stage = stage;
-          this.$emit("select", {zone, stage});
-        } else if (this.$route.name === this.routerNames.index) {
-          this.internalStep = 1;
+    selectedStage () {
+      if (!this.selected.stage) return {}
+      return get.stages.byStageId(this.selected.stage)
+    },
+    currentStageImage () {
+      const zone = this.selectedZone
+      if (this.lowData) return null
 
-          this.selected.zone = null;
-          this.selected.stage = null;
-        }
+      if (zone.background) return this.cdnDeliver(zone.background)
+      return null
+    },
+    relativeStages () {
+      if (!this.selected.stage) return null
+      const allStagesInZone = get.stages.byParentZoneId(this.selected.zone)
+      const stageInZoneIndex = allStagesInZone.indexOf(allStagesInZone.find(el => el.stageId === this.selected.stage))
+
+      const self = this
+
+      function validStage (stage) {
+        // console.log(stageInZoneIndex, stage)
+        if (self.hideClosed && (!stage || !stage.dropInfos)) return null
+        return existUtils.existence(stage) ? stage : null
+      }
+
+      return {
+        prev: stageInZoneIndex > 0 ? validStage(allStagesInZone[stageInZoneIndex - 1]) : null,
+        next: stageInZoneIndex < (allStagesInZone.length - 1) ? validStage(allStagesInZone[stageInZoneIndex + 1]) : null
       }
     },
+    preferencedStages () {
+      const favorites = this.$store.getters['stagePreferences/favorites']
+        .map(el => get.stages.byStageId(el))
+        .filter(el => get.zones.byZoneId(el.zoneId, true, false))
+      const histories = this.$store.getters['stagePreferences/histories']
+        .map(el => get.stages.byStageId(el))
+        .filter(el => get.zones.byZoneId(el.zoneId, true, false))
+
+      return {
+        favorites,
+        histories,
+        haveAny: !!favorites.length + histories.length
+      }
+    }
+  },
+  watch: {
+    $route () {
+      this.checkRoute()
+    }
+  },
+  beforeMount () {
+    this.checkRoute()
+  },
+  mounted () {
+    if (this.stage) {
+      const stage = get.stages.byStageCode(this.stage)
+      if (!stage.stageId) {
+        this.selectStage(stage.zoneId, stage.stageId)
+      }
+    }
+  },
+  methods: {
+    selectStage (zone, stage, incrementStep = true) {
+      Console.log('StageSelector', 'chose', zone, stage)
+      this.selected.zone = zone
+      this.selected.stage = stage
+      this.$emit('select', { zone, stage })
+      if (incrementStep) {
+        this.step += 1
+      } else {
+        this.$router.push({
+          name: this.routerNames.details,
+          params: {
+            zoneId: this.selected.zone,
+            stageId: this.selected.stage
+          }
+        })
+      }
+    },
+    checkRoute () {
+      if (!this.bindRouter) return
+      if (this.$route.name === this.routerNames.details) {
+        this.internalStep = 2
+        const zone = this.$route.params.zoneId
+        const stage = this.$route.params.stageId
+        this.selected.zone = zone
+        this.selected.stage = stage
+        this.$emit('select', { zone, stage })
+      } else if (this.$route.name === this.routerNames.index) {
+        this.internalStep = 1
+
+        this.selected.zone = null
+        this.selected.stage = null
+      }
+    }
   }
+}
 </script>
 
 <style scoped>
-.monospace {
-  font-family: Consolas, Courier, monospace;
-}
 
-  .full-width {
-    width: 100%;
+  .history-stage-cards {
+    /* 92px: 2 lines of cardHeight (38px stage card height + 2 * 4px margin) */
+    max-height: 92px;
+    overflow: hidden;
+
+    /* 83(82.8)px: 1.8 * cardHeight */
+    /* 65px: 2 * cardHeight - 4px margin */
+    /*mask: linear-gradient(to right, rgba(0, 0, 0, 1) 90%, transparent);*/
+    /*-webkit-mask: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 1)), color-stop(92), to(rgba(0, 0, 0, 0)));*/
+    /*-webkit-mask: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 1) ), to(rgba(0, 0, 0, 0)));*/
   }
+
 </style>

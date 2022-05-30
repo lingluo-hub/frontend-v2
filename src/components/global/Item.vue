@@ -1,94 +1,128 @@
 <template>
   <v-tooltip
-    v-if="!disableTooltip"
-    :open-delay="40"
-    :nudge-top="10"
+    v-if="!disableTooltipCalculated"
+    allow-overflow
+    offset-overflow
+    :open-delay="-1"
 
-    v-bind="calculatedTooltipPosition"
+    :right="right"
+    :bottom="bottom"
+    v-bind="tooltipOptions"
+    content-class="transparent backdrop-blur o-100 pa-0"
   >
-    <template v-slot:activator="{ on }">
-      <span v-on="on">
+    <template #activator="{ on, attrs }">
+      <span
+        class="d-flex align-center"
+        v-bind="attrs"
+        v-on="on"
+      >
         <ItemIcon
           :item="item"
           :ratio="ratio"
-          :class="{'sticky-left': sticky === 'left'}"
-          :disable-tooltip="disableTooltip"
+          :class="contentClass"
+          :disable-tooltip="disableTooltipCalculated"
+          v-on="on"
         />
       </span>
     </template>
-    <span>{{ name }}</span>
+    <!--    <span class="force-lang-font">{{ name }}</span>-->
+    <PreviewItemCard
+      :disabled-overview="disableOverviewCard"
+      :item-id="item.itemId"
+    />
   </v-tooltip>
   <ItemIcon
-    v-else-if="disableTooltip"
+    v-else-if="disableTooltipCalculated"
+
     :item="item"
     :ratio="ratio"
-    :class="{'sticky-left': sticky === 'left'}"
-    :disable-tooltip="disableTooltip"
+    :class="contentClass"
+    :disable-tooltip="disableTooltipCalculated"
   />
 </template>
 
 <script>
-  import ItemIcon from "@/components/global/ItemIcon";
-  import strings from "@/utils/strings";
-  export default {
-    name: "Item",
-    components: {ItemIcon},
-    props: {
-      item: {
-        type: Object,
-        required: true
-      },
-      ratio: {
-        type: Number,
-        default() {
-          return 0.75;
-        }
-      },
-      disableTooltip: {
-        type: Boolean,
-        default() {
-          return false;
-        }
-      },
-      disableLink: {
-        type: Boolean,
-        default() {
-          return false;
-        }
-      },
-      tooltipPosition: {
-        type: String,
-        default () {
-          return "bottom";
-        }
-      },
-      sticky: {
-        type: String,
-        default () {
-          return "";
-        }
+import ItemIcon from '@/components/global/ItemIcon'
+import strings from '@/utils/strings'
+import PreviewItemCard from '@/components/stats/PreviewItemCard'
+import environment from '@/utils/environment'
+export default {
+  name: 'Item',
+  components: { PreviewItemCard, ItemIcon },
+  props: {
+    item: {
+      type: Object,
+      required: true
+    },
+    ratio: {
+      type: Number,
+      default () {
+        return 0.75
       }
     },
-    data() {
+    disableTooltip: {
+      type: Boolean,
+      default () {
+        return false
+      }
+    },
+    disableOverviewCard: {
+      type: Boolean,
+      default () {
+        return false
+      }
+    },
+    tooltipNudge: {
+      type: Number,
+      default () {
+        return 0
+      }
+    },
+    right: {
+      type: Boolean,
+      default () {
+        return false
+      }
+    },
+    bottom: {
+      type: Boolean,
+      default () {
+        return true
+      }
+    },
+    contentClass: {
+      type: String,
+      default () {
+        return ''
+      }
+    }
+  },
+  data () {
+    return {
+      showTooltip: false
+    }
+  },
+  computed: {
+    name () {
+      return strings.translate(this.item, 'name')
+    },
+    tooltipOptions () {
       return {
-        showTooltip: false
-      };
-    },
-    computed: {
-      name() {
-        return strings.translate(this.item, "name")
-      },
-      calculatedTooltipPosition () {
-        return {[this.tooltipPosition]: true}
+        [this.bottom ? 'nudgeTop' : 'nudgeLeft']: this.tooltipNudge,
+        [this.bottom ? 'nudgeBottom' : 'null']: this.tooltipNudge,
+        transition: this.bottom ? 'slide-y-transition' : 'slide-x-transition'
       }
     },
-  };
+    disableTooltipCalculated () {
+      // always disable tooltip on environment that cannot support hover
+      return !environment.canHover || this.disableTooltip
+    }
+  }
+}
 </script>
 
 <style scoped>
   .sticky-left {
-    position: -webkit-sticky;
-    position: sticky;
-    left: 0;
+    position: absolute;
   }
 </style>

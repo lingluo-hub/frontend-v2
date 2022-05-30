@@ -1,5 +1,11 @@
 {
   "root": true,
+  "globals": {
+    "GIT_COMMIT": true,
+    "PENGUIN_PLATFORM": true,
+    "PENGUIN_BUILDFROM": true,
+    "NPM_PACKAGE_VERSION": true
+  },
   "env": {
     "node": true
   },
@@ -11,10 +17,24 @@
     "no-console": "off",
     "vuetify/no-deprecated-classes": "error",
     "vuetify/grid-unknown-attributes": "error",
-    "vuetify/no-legacy-grid": "error"
+    "vuetify/no-legacy-grid": "error",
+    "vue/no-v-html": "off",
+    "vue/no-template-shadow": "off",
+    "vue/valid-template-root": "off",
+    "vue/no-unused-vars": "off",
+    "no-debugger": "off",
+    "no-tabs": [
+      "error",
+      {
+        "allowIndentationTabs": true
+      }
+    ],
+    "vue/multi-word-component-names": "off",
+    "vue/no-side-effects-in-computed-properties": "warn",
+    "vue/valid-v-slot": "warn"
   },
   "parserOptions": {
-    "parser": "babel-eslint"
+    "parser": "@babel/eslint-parser"
   },
   "plugins": [
     "vuetify"

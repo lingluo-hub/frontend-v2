@@ -1,32 +1,3 @@
-<i18n>
-  {
-    "zh": {
-      "dataSourceToggle": {
-        "title": "需要登录",
-        "loginNotice": "查看个人掉落数据前，请先登录",
-        "all": "全平台",
-        "personal": "个人"
-      }
-    },
-    "en": {
-      "dataSourceToggle": {
-        "title": "Login Required",
-        "loginNotice": "Please log in before viewing personal drop data.",
-        "all": "All",
-        "personal": "Personal"
-      }
-    },
-    "ja": {
-      "dataSourceToggle": {
-        "title": "ログインが必要です",
-        "loginNotice": "個人のドロップデータを表示するにはログインが必要となります。",
-        "all": "全体",
-        "personal": "個人"
-      }
-    }
-  }
-</i18n>
-
 <template>
   <span>
     <v-dialog
@@ -39,7 +10,7 @@
         dark
       >
         <v-card-text>
-          {{ $t('meta.loading') }}
+          {{ $t('fetch.loading') }}
           <v-progress-linear
             indeterminate
             color="white"
@@ -54,10 +25,10 @@
     >
       <v-card>
         <v-card-title class="headline">
-          {{ $t('dataSourceToggle.title') }}
+          {{ $t('dataSource.title') }}
         </v-card-title>
         <v-card-text>
-          {{ $t('dataSourceToggle.loginNotice') }}
+          {{ $t('dataSource.loginNotice') }}
         </v-card-text>
 
         <v-card-actions>
@@ -68,71 +39,78 @@
     </v-dialog>
     <v-btn-toggle
       v-model="dataSource"
+      active-class="font-weight-bold"
+      mandatory
       borderless
       class="data-source-switch"
     >
       <v-btn
+        v-haptic
         small
         value="global"
       >
-        {{ $t('dataSourceToggle.all') }}
+        {{ $t('dataSource.global') }}
       </v-btn>
       <v-btn
+        v-haptic
         small
         value="personal"
       >
-        {{ $t('dataSourceToggle.personal') }}
+        {{ $t('dataSource.personal') }}
       </v-btn>
     </v-btn-toggle>
   </span>
 </template>
 
 <script>
-import AccountManager from "@/components/toolbar/AccountManager";
+import AccountManager from '@/components/toolbar/AccountManager'
+import { mapGetters } from 'vuex'
 export default {
-  name: "DataSourceToggle",
+  name: 'DataSourceToggle',
   components: {
     AccountManager
   },
-  data() {
+  data () {
     return {
       dialog: false,
       prefetchingResources: false,
       dataSourceId: null
-    };
+    }
   },
   computed: {
+    ...mapGetters('auth', ['loggedIn']),
+    ...mapGetters('dataSource', ['source']),
     dataSource: {
-      get() {
-        return this.$store.state.dataSource;
+      get () {
+        return this.source
       },
-      async set(value) {
+      async set (value) {
         switch (value) {
-          case "global":
-            break;
-          case "personal":
+          case 'global':
+            break
+          case 'personal':
             // refresh personal data
-            if (!this.$store.getters.authed) {
+            if (!this.loggedIn) {
               // please login
-              this.dialog = true;
-              return;
+              this.dialog = true
+              return
             }
             // fetch data
-            this.$store.dispatch("refreshPersonalMatrixData");
+            this.$store.dispatch('data/refreshPersonalMatrix')
             // change data source after fetch data
-            break;
+            break
         }
-        this.$store.commit("switchDataSource", value);
+        this.$store.commit('dataSource/changeSource', value)
       }
     }
   },
   methods: {
-    afterLogin() {
-      this.dialog = false;
-      this.dataSource = "personal";
+    afterLogin () {
+      this.dialog = false
+      this.dataSource = 'personal'
     }
   }
-};
+}
 </script>
 
 <style scoped>

@@ -1,19 +1,28 @@
 <template>
   <v-container
-    class="fill-height"
+    class="fill-height justify-center align-start"
     fluid
   >
-    <transition
-      name="slide-fade"
-      mode="out-in"
+    <v-row
+      align="start"
+      no-gutters
+      style="max-width: inherit"
     >
-      <router-view />
-    </transition>
+      <v-col>
+        <transition
+          name="fade-transition"
+          leave-active-class="position-absolute"
+          :duration="325"
+        >
+          <router-view />
+        </transition>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script>
-  export default {
-    name: "StatsLayout"
-  }
+export default {
+  name: 'StatsLayout'
+}
 </script>

@@ -1,18 +1,18 @@
 <template>
   <v-dialog
     v-model="showDialog"
-    fullscreen
-    hide-overlay
-    transition="dialog-bottom-transition"
+    transition="scale-transition"
+    max-width="850px"
   >
-    <template v-slot:activator="{ on }">
+    <template #activator="{ on, attrs }">
       <slot />
       <div
-        class="sparkline"
+        v-if="sparklineValue"
+        class="sparkline transition-all cursor-pointer digdown-hoverable"
+        v-bind="attrs"
         v-on="on"
       >
         <v-sparkline
-          v-if="sparklineValue"
           :value="sparkline.value"
           :gradient="sparkline.gradient"
           :smooth="sparkline.radius || false"
@@ -21,35 +21,46 @@
           :stroke-linecap="sparkline.lineCap"
           :gradient-direction="sparkline.gradientDirection"
           auto-draw
+          :auto-draw-duration="3000"
+          auto-draw-easing="cubic-bezier(0.165, 0.84, 0.44, 1)"
         />
       </div>
     </template>
-    <div class="charts-wrapper">
-      <v-toolbar>
-        <v-toolbar-title>Charts</v-toolbar-title>
-
-        <v-spacer />
-
-        <v-btn
-          icon
-          @click="showDialog = false"
-        >
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-toolbar>
-      <div
-        :id="computedChartsId"
-        class="charts"
+    <DialogCard
+      :title="meta.name"
+      :subtitle="$t('stats.trends.name')"
+      @close="showDialog = false"
+    >
+      <Chart
+        v-if="showDialog"
+        :options="chartData"
+        :highcharts="highchartsInst"
+        class="charts mt-4 pb-4"
       />
-    </div>
+      <div class="bottom-caption text-center caption">
+        {{ $t('stats.lastUpdated', {date: lastUpdated}) }}
+      </div>
+    </DialogCard>
   </v-dialog>
 </template>
 
 <script>
-import Plotly from "@/vendors/plotly";
-import formatter from "@/utils/timeFormatter";
+import Theme from '@/mixins/Theme'
+import DialogCard from '@/components/global/DialogCard'
+import { Chart } from 'highcharts-vue'
+import timeFormatter from '@/utils/timeFormatter'
+
+import Highcharts from 'highcharts'
+import exportingInit from 'highcharts/modules/exporting'
+import exportDataInit from 'highcharts/modules/export-data'
+
+exportingInit(Highcharts)
+exportDataInit(Highcharts)
+
 export default {
-  name: "Charts",
+  name: 'Charts',
+  components: { DialogCard, Chart },
+  mixins: [Theme],
   props: {
     xStart: {
       type: Number,
@@ -57,7 +68,7 @@ export default {
     },
     interval: {
       type: Number,
-      default: 1
+      default: 86400000
     },
     value: {
       type: Boolean,
@@ -66,13 +77,13 @@ export default {
     data: {
       type: Object,
       default: () => {
-        return [10, 15, 13, 17];
+        return {}
       }
     },
     dataKeys: {
       type: Array,
       default: () => {
-        return [];
+        return []
       }
     },
     sparklineKey: {
@@ -87,63 +98,68 @@ export default {
       type: String,
       required: true
     },
-    height: {
-      type: Number,
-      default: window.innerHeight - 64 // minus toolbar height
-    },
-    width: {
-      type: Number,
-      default: window.innerWidth
+    meta: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     }
   },
-  data() {
+  data () {
     return {
-      initDate: new Date(),
+      initAt: Date.now(),
       showDialog: this.value
-    };
+    }
   },
   computed: {
-    gradient() {
-      return this.$store.state.settings.dark ? ["white"] : ["black"];
+    highchartsInst () {
+      return Highcharts
     },
-    sparkline() {
+    gradient () {
+      return this.dark
+        ? ['rgba(255, 255, 255, .3)', 'rgba(255, 255, 255, 1)']
+        : ['rgba(0, 0, 0, .3)', 'rgba(0, 0, 0, 1)']
+    },
+    sparkline () {
       return {
-        width: 10,
+        width: 14,
         radius: 100,
-        padding: 0,
-        lineCap: "round",
+        padding: 8,
+        lineCap: 'round',
         gradient: this.gradient,
         value: this.sparklineValue,
-        gradientDirection: "top"
-      };
+        gradientDirection: 'left'
+      }
     },
-    computedChartsId() {
-      return `${this.initDate.getTime().toString()}_${this.chartsId}`;
+    computedChartsId () {
+      return `${this.initAt.toString()}_${this.chartsId}`
     },
-    xAxis() {
-      let array = this.data[this.sparklineKey].map((item, index) => {
-        return new Date(this.xStart + index * this.interval);
-      });
-      return formatter.dates(array);
+    xAxis () {
+      const array = this.data[this.sparklineKey].map((item, index) => {
+        return new Date(this.xStart + index * this.interval)
+      })
+      return timeFormatter.dates(array, false)
     },
-    yAxis() {
-      let yAxis = Object.keys(this.data)
+    yAxis () {
+      const yAxis = Object.keys(this.data)
         .map(yAxisKey => {
           if (this.dataKeys.indexOf(yAxisKey) > -1) {
-            return this.data[yAxisKey];
+            return this.data[yAxisKey]
           }
         })
-        .filter(data => data != null);
-      return yAxis;
+        .filter(data => data != null)
+      return yAxis
     },
-    sparklineData() {
+    sparklineData () {
       if (
         this.sparklineKey &&
         this.sparklineSubKey &&
+        this.data[this.sparklineKey] &&
+        this.data[this.sparklineSubKey] &&
         this.data[this.sparklineKey].length &&
         this.data[this.sparklineSubKey].length
       ) {
-        let array = [];
+        const array = []
         for (
           let index = 0;
           index < this.data[this.sparklineKey].length;
@@ -152,104 +168,245 @@ export default {
           if (this.data[this.sparklineSubKey][index]) {
             let temp =
               this.data[this.sparklineKey][index] /
-              this.data[this.sparklineSubKey][index];
-            temp *= 100;
-            array.push(temp);
+              this.data[this.sparklineSubKey][index]
+            temp *= 100
+            array.push(temp)
           } else {
-            array.push(null);
+            array.push(null)
           }
         }
-        return array;
+        return array
       }
-      return [];
+      return []
     },
     filterSparklineData () {
       return this.sparklineData.filter(data => data !== null)
     },
-    sparklineValue() {
+    sparklineValue () {
       if (
         this.sparklineKey &&
         this.sparklineSubKey &&
         this.sparklineData.length
       ) {
-        let noZeroArray = this.filterSparklineData.filter(data => data !== 0);
-        let tempArray = [];
+        const noZeroArray = this.filterSparklineData.filter(data => data !== 0)
+        let tempArray = []
         if (noZeroArray.length > 15) {
-          tempArray = noZeroArray.slice(-15);
+          tempArray = noZeroArray.slice(-15)
         } else {
-          tempArray = this.filterSparklineData;
+          tempArray = this.filterSparklineData
         }
         if (tempArray.length > 1) {
-          return tempArray;
+          return tempArray
         } else {
-          return [0, 0];
+          return [0, 0]
         }
       } else {
-        return [1, 1];
+        return null
       }
-    }
-  },
-  watch: {
-    showDialog(value) {
-      if (value) {
-        const traceArray = Object.keys(this.yAxis).map(yAxisKey => {
-          return {
-            x: this.xAxis,
-            y: this.yAxis[yAxisKey],
-            opacity: 0.3,
-            type: "bar",
-            name: yAxisKey,
-            connectgaps: true
-          };
-        });
-        traceArray.push({
-          x: this.xAxis,
-          y: this.sparklineData,
-          yaxis: "y2",
-          error_y: {
-            type: 'percent',
-            value: 10
+    },
+    lastUpdated () {
+      const last = this.$store.getters['data/updated']({ id: 'trends' })
+      return `${timeFormatter.date(last, true, true)} (${timeFormatter.dayjs(last).fromNow()})`
+    },
+    chartData () {
+      if (this.showDialog) {
+        const theme = this.$vuetify.theme.currentTheme
+
+        return {
+          title: {
+            style: {
+              color: theme.text
+            },
+            text: this.meta.name
           },
-          opacity: 1,
-          line: { shape: "spline", smoothing: 0.8 },
-          connectgaps: true,
-          name: "rate"
-        });
-        let layout = {
-          width: this.width,
-          height: this.height,
-          yaxis: { title: "Samples" },
-          yaxis2: {
-            title: "Rate",
-            titlefont: { color: "rgb(148, 103, 189)" },
-            tickfont: { color: "rgb(148, 103, 189)" },
-            overlaying: "y",
-            side: "right"
+
+          subtitle: {
+            style: {
+              color: theme.textDarken
+            },
+            text: this.$t('stats.trends.name')
+          },
+
+          xAxis: {
+            categories: this.xAxis,
+            labels: {
+              style: {
+                color: theme.text
+              }
+            },
+            title: {
+              style: {
+                color: theme.text
+              }
+            },
+            crosshair: true
+          },
+
+          yAxis: [
+            {
+              min: 0,
+              name: this.$t('stats.trends.set.rate'),
+              title: {
+                style: {
+                  color: theme.text
+                },
+                text: this.$t('stats.trends.set.rate')
+              },
+              labels: {
+                format: '{value} %',
+                style: {
+                  color: theme.text
+                }
+              },
+              opposite: true
+            },
+            {
+              min: 0,
+              name: this.$t('stats.trends.set.sample'),
+              title: {
+                style: {
+                  color: theme.text
+                },
+                text: this.$t('stats.trends.set.sample')
+              },
+              labels: {
+                style: {
+                  color: theme.text
+                }
+              },
+              minTickInterval: 1
+            }
+          ],
+
+          series: [
+            {
+              name: this.$t('stats.trends.set.sample'),
+              type: 'column',
+              yAxis: 1,
+              data: this.data.times,
+              color: theme.accent1
+            },
+            {
+              name: this.$t('stats.trends.set.drops'),
+              type: 'column',
+              yAxis: 1,
+              data: this.data.quantity,
+              color: theme.accent2
+            },
+            {
+              name: this.$t('stats.trends.set.rate'),
+              type: 'spline',
+              yAxis: 0,
+              data: this.sparklineData,
+              tooltip: {
+                valueSuffix: '%',
+                valueDecimals: 2
+              },
+              color: theme.accent3,
+              marker: {
+                lineWidth: 2,
+                radius: 2,
+                lineColor: theme.text,
+                fillColor: theme.text
+              },
+              connectNulls: true
+            }
+          ],
+
+          tooltip: {
+            shared: true,
+            // formatter: function () {
+            //   console.log("this", this)
+            //   return this.points.reduce(function (s, point, index) {
+            //     console.log("reduce", s, point, index)
+            //     let y = point.y
+            //     if (index === 1) y = `${y.toFixed(2)} %`
+            //     return `${s}<br/>${point.series.name}: ${y}`;
+            //   }, `<b>${this.x}</b>`);
+            // },
+
+            // split: true,
+            backgroundColor: theme.background,
+
+            useHTML: true,
+            headerFormat: '<h4 class="subtitle-1" style="margin-left: 2px">{point.key}</h4><table>',
+            pointFormat: `<tr style="color: ${theme.text}"><td style="color: {series.color}">{series.name}: </td>` +
+              '<td style="text-align: right"><b>{point.y}</b></td></tr>',
+            footerFormat: '</table>',
+
+            // distance: 8,
+            // padding: 5,
+            style: {
+              color: theme.text
+            },
+            crosshairs: [true, true]
+          },
+
+          credits: {
+            enabled: false
+          },
+
+          legend: {
+            itemStyle: {
+              color: theme.text
+            }
+          },
+
+          pane: {
+            background: {
+              backgroundColor: theme.background
+            }
+          },
+
+          chart: {
+            backgroundColor: theme.background,
+            style: {
+              fontFamily: '"benderregular", SF Mono, "Droid Sans Mono", Ubuntu Mono, Consolas, Courier New, Courier, monospace',
+              color: theme.text
+            }
+          },
+
+          plotOptions: {
+            column: {
+              grouping: true,
+              shadow: false,
+              borderWidth: 0
+            }
           }
-        };
-
-        let data = traceArray;
-
-        Plotly.newPlot(this.computedChartsId, data, layout);
+        }
+      } else {
+        return {}
       }
     }
   },
   methods: {}
-};
+}
 </script>
 
 <style scoped>
-.charts-wrapper {
+.charts {
   width: 100%;
-  height: -webkit-fill-available;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #fff;
   flex-direction: column;
+  min-width: 600px;
+}
+
+.bottom-caption {
+  position: absolute;
+  bottom: 72px;
+  left: 0;
+  right: 0;
 }
 .sparkline {
-  width: 40px;
-  margin-left: 5px;
+  display: inline-flex;
+  width: 56px;
+  height: 36px;
+  padding: 8px;
+
+  margin-left: 4px;
+  border-radius: 4px;
 }
 </style>
