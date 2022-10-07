@@ -20,66 +20,58 @@
         lg="3"
         xl="2"
       >
-        <v-card-title class="py-4 pl-0">
-          <v-icon left>
-            mdi-information
-          </v-icon>
-          {{ $t('stage.about') }}
-        </v-card-title>
-
-        <!--        <FactTable class="mb-4">-->
-        <!--          <FactTableItem-->
-        <!--            title="章节"-->
-        <!--            :content="zone.zoneName"-->
-        <!--          />-->
-        <!--          <FactTableItem-->
-        <!--            title="作战"-->
-        <!--            :content="stage.code"-->
-        <!--          />-->
-        <!--        </FactTable>-->
-
-        <FactTable class="mb-6">
-          <FactTableItem
-            :title="$t('stats.headers.apCost')"
-            :content="stage.apCost"
-          />
-          <FactTableItem
-            :title="$t('stats.headers.clearTime')"
-            :content="formatDuration(stage.minClearTime)"
-          />
-        </FactTable>
-
-        <BackdropCard
-          v-for="link in links"
-          :key="link.id"
-          small
-          hover
-          dense
-          :href="link.href"
-          class="bkop-medium mb-2 py-3 "
-        >
-          <template #backdrop>
-            <v-icon>
-              {{ link.icon }}
+        <template v-if="!isRecruit">
+          <v-card-title class="py-4 pl-0">
+            <v-icon left>
+              mdi-information
             </v-icon>
-          </template>
+            {{ $t('stage.about') }}
+          </v-card-title>
 
-          <h2 class="heading d-flex flex-row align-center px-6">
-            <span class="text-left text-no-wrap">
-              {{ $t('stage.actions.links.' + link.id) }}
-            </span>
-            <v-divider class="flex-grow-1 ml-2 mr-1" />
-            <span class="caption monospace ml-1 flex-shrink-1">
-              <v-icon
-                small
-              >
-                mdi-open-in-new
+          <FactTable class="mb-6">
+            <FactTableItem
+              :title="$t('stats.headers.apCost')"
+              :content="stage.apCost"
+            />
+            <FactTableItem
+              :title="$t('stats.headers.clearTime')"
+              :content="formatDuration(stage.minClearTime)"
+            />
+          </FactTable>
+
+          <BackdropCard
+            v-for="link in links"
+            :key="link.id"
+            small
+            hover
+            dense
+            :href="link.href"
+            class="bkop-medium mb-2 py-3 "
+          >
+            <template #backdrop>
+              <v-icon>
+                {{ link.icon }}
               </v-icon>
+            </template>
 
-              {{ link.hostname }}
-            </span>
-          </h2>
-        </BackdropCard>
+            <h2 class="heading d-flex flex-row align-center px-6">
+              <span class="text-left text-no-wrap">
+                {{ $t('stage.actions.links.' + link.id) }}
+              </span>
+              <v-divider class="flex-grow-1 ml-2 mr-1" />
+              <span class="caption monospace ml-1 flex-shrink-1">
+                <v-icon
+                  small
+                >
+                  mdi-open-in-new
+                </v-icon>
+
+                {{ link.hostname }}
+              </span>
+            </h2>
+          </BackdropCard>
+        </template>
+
 
         <v-card-title class="py-4 pl-0">
           <v-icon left>
@@ -166,20 +158,37 @@
         </v-btn>
 
         <Share :stage="stage" />
+
+        <v-btn
+          v-if="validStage && !isRecruit"
+          v-haptic
+          block
+          large
+          color="cyan"
+          outlined
+          :class="{'cyan--text text--darken-4': !dark}"
+          class="mb-2 black--text"
+          :to="{name: 'ReportByZone_Selected', params: {zoneId: zone.zoneId, stageId: stage.stageId}}"
+        >
+          <v-icon left>
+            mdi-upload
+          </v-icon>
+          {{ $t('menu.report._name') }}
+        </v-btn>
       </v-col>
     </v-row>
   </v-card>
 </template>
 
 <script>
-import timeFormatter from '@/utils/timeFormatter'
+import BackdropCard from '@/components/global/BackdropCard'
+import Share from '@/components/stats/details/Share'
+import StagePattern from '@/components/stats/details/StagePattern'
 import FactTable from '@/components/stats/fact-table/FactTable'
 import FactTableItem from '@/components/stats/fact-table/FactTableItem'
-import BackdropCard from '@/components/global/BackdropCard'
 import Theme from '@/mixins/Theme'
 import mirror from '@/utils/mirror'
-import StagePattern from '@/components/stats/details/StagePattern'
-import Share from '@/components/stats/details/Share'
+import timeFormatter from '@/utils/timeFormatter'
 
 export default {
   name: 'StageDetails',
@@ -196,6 +205,10 @@ export default {
     },
     stats: {
       type: Array,
+      required: true
+    },
+    validStage: {
+      type: Boolean,
       required: true
     }
   },
@@ -228,6 +241,9 @@ export default {
     },
     isFavorite () {
       return this.$store.getters['stagePreferences/hasFavorite'](this.stage.stageId)
+    },
+    isRecruit () {
+      return this.stage.stageId === 'recruit'
     }
   },
   methods: {

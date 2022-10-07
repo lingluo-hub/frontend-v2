@@ -1,6 +1,6 @@
-import { service } from '@/utils/service'
 import store from '@/store'
 import Console from '@/utils/Console'
+import { service } from '@/utils/service'
 
 /**
  * Object Life-cycle manager
@@ -46,6 +46,10 @@ class ObjectManager {
     return store.getters['dataSource/server']
   }
 
+  get category () {
+    return store.getters['dataSource/category']
+  }
+
   /**
    * check the cache validity
    *
@@ -77,7 +81,7 @@ class ObjectManager {
   get apiConfig () {
     let url
     if (typeof this.api.url === 'function') {
-      url = this.api.url.call(null, this.server)
+      url = this.api.url.call(null, this.server, this.category);
     } else if (typeof this.api.url === 'string') {
       url = this.api.url
     } else {
@@ -164,6 +168,8 @@ class ObjectManager {
             reject(err)
           })
       })
+
+      this.promise = promise
 
       context.ajaxHooks.response(context.name, promise)
       return promise

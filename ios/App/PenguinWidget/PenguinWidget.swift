@@ -9,6 +9,12 @@ import WidgetKit
 import SwiftUI
 
 @main
+struct PenguinWidgets: WidgetBundle {
+    var body: some Widget {
+        PenguinWidget()
+    }
+}
+
 struct PenguinWidget: Widget {
     let kind: String = "PenguinWidget"
     let name: LocalizedStringKey = "SiteStatsWidgetName"
@@ -17,14 +23,30 @@ struct PenguinWidget: Widget {
     var body: some WidgetConfiguration {
         IntentConfiguration(
             kind: kind,
-            intent: StatisticsOverviewIntent.self,
+            intent: SelectServerIntent.self,
             provider: SiteStatsProvider()
         ) { entry in
             WidgetEntry(entry: entry)
         }
         .configurationDisplayName("SiteStatsWidgetName")
         .description("SiteStatsWidgetDesc")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .adaptedSupportedFamilies()
     }
 }
 
+extension WidgetConfiguration {
+    func adaptedSupportedFamilies() -> some WidgetConfiguration {
+        if #available(iOSApplicationExtension 16, *) {
+            return self.supportedFamilies([
+                .systemSmall,
+                .systemMedium,
+                .accessoryRectangular
+            ])
+        } else {
+            return self.supportedFamilies([
+                .systemSmall,
+                .systemMedium
+            ])
+        }
+    }
+}

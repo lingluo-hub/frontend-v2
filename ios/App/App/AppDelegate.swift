@@ -4,8 +4,6 @@ import Capacitor
 import SwiftUI
 import Network
 
-//import RxBus
-//import RxSwift
 import os
 
 let alreadyLaunchedKey = "alreadyLaunched"

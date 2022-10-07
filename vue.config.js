@@ -61,11 +61,11 @@ module.exports = {
       enableInSFC: true,
     },
   },
-  productionSourceMap: false,
+  // productionSourceMap: false,
   devServer: {
     proxy: {
       "/PenguinStats": {
-        target: "https://penguin-stats.cn/",
+        target: "https://penguin-stats.io/",
         // target: "http://localhost:9010/",
       },
     },
@@ -86,6 +86,7 @@ module.exports = {
         patterns: [
           {
             from: templateRoot,
+            noErrorOnMissing: true,
             globOptions: {
               ignore: ["**/index.html"],
             },

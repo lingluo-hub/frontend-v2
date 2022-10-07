@@ -252,12 +252,12 @@
         </HeaderWithTooltip>
       </template>
 
-      <template #header.stdDev="{header}">
+      <!-- <template #header.stdDev="{header}">
         <div>
           {{ header.text }}
           <DataTableFluctuationCustomize />
         </div>
-      </template>
+      </template> -->
 
       <template #header.apPPR="{header}">
         <HeaderWithTooltip :name="header.text">
@@ -294,8 +294,8 @@
             >
               <v-row
                 align="center"
-                class="cursor-pointer item-name pl-1"
-                @click="redirectItem(props.item.item.itemId)"
+                :class="{'cursor-pointer': !isRecruit, 'pointer-events-none': isRecruit, 'item-name pl-1': true}"
+                @click="!isRecruit && redirectItem(props.item.item.itemId)"
               >
                 <Item
                   :item="props.item.item"
@@ -313,12 +313,14 @@
                   {{ strings.translate(props.item.item, "name") }}
                 </span>
                 <v-icon
+                  v-if="!isRecruit"
                   x-small
                   class="ml-1 item-name--chevron"
                 >
                   mdi-link
                 </v-icon>
                 <v-divider
+                  v-if="!isRecruit"
                   class="mx-4 item-name--line"
                 />
               </v-row>
@@ -392,40 +394,42 @@
             />
           </td>
 
-          <td
+          <!-- <td
             :class="tableCellClasses"
           >
             <DataTableFluctuationVisualizer :item="props.item" />
-          </td>
+          </td> -->
 
-          <NullableTableCell
-            :value="props.item.apPPR"
-            :class="tableCellClasses"
-          />
-
-          <template v-if="type === 'item'">
+          <template v-if="!isRecruit">
             <NullableTableCell
-              :value="props.item.stage.apCost"
-              :class="`${tableCellClasses} ${dark ? 'orange--text text--lighten-1' : 'deep-orange--text text--darken-3 font-weight-bold'}`"
+              :value="props.item.apPPR"
+              :class="tableCellClasses"
             />
+
+            <template v-if="type === 'item'">
+              <NullableTableCell
+                :value="props.item.stage.apCost"
+                :class="`${tableCellClasses} ${dark ? 'orange--text text--lighten-1' : 'deep-orange--text text--darken-3 font-weight-bold'}`"
+              />
+              <NullableTableCell
+                :value="props.item.stage.minClearTime"
+                :transformer="formatDuration"
+                :class="tableCellClasses"
+              />
+            </template>
+
             <NullableTableCell
-              :value="props.item.stage.minClearTime"
+              :value="props.item.itemPerTime"
               :transformer="formatDuration"
               :class="tableCellClasses"
             />
+
+            <td
+              :class="tableCellClasses"
+            >
+              {{ formatDate(props.item) }}
+            </td>
           </template>
-
-          <NullableTableCell
-            :value="props.item.itemPerTime"
-            :transformer="formatDuration"
-            :class="tableCellClasses"
-          />
-
-          <td
-            :class="tableCellClasses"
-          >
-            {{ formatDate(props.item) }}
-          </td>
         </tr>
       </template>
       <!--          <template #item.percentage="{item}">-->
@@ -438,26 +442,26 @@
 </template>
 
 <script>
-import strings from '@/utils/strings'
-import get from '@/utils/getters'
 import Item from '@/components/global/Item'
-import { mapGetters, mapState } from 'vuex'
-import Theme from '@/mixins/Theme'
-import Charts from '@/components/stats/Charts'
-import timeFormatter from '@/utils/timeFormatter'
-import CDN from '@/mixins/CDN'
-import Mirror from '@/mixins/Mirror'
 import TitledRow from '@/components/global/TitledRow'
-import existUtils from '@/utils/existUtils'
-import validator from '@/utils/validator'
+import Charts from '@/components/stats/Charts'
 import HeaderWithTooltip from '@/components/stats/HeaderWithTooltip'
 import NullableTableCell from '@/components/stats/NullableTableCell'
-import DataTableFluctuationVisualizer from '@/components/stats/DataTableFluctuationVisualizer'
-import DataTableFluctuationCustomize from "@/components/stats/DataTableFluctuationCustomize";
+import CDN from '@/mixins/CDN'
+import Mirror from '@/mixins/Mirror'
+import Theme from '@/mixins/Theme'
+import existUtils from '@/utils/existUtils'
+import get from '@/utils/getters'
+import strings from '@/utils/strings'
+import timeFormatter from '@/utils/timeFormatter'
+import validator from '@/utils/validator'
+import { mapGetters, mapState } from 'vuex'
+// import DataTableFluctuationVisualizer from '@/components/stats/DataTableFluctuationVisualizer'
+// import DataTableFluctuationCustomize from "@/components/stats/DataTableFluctuationCustomize";
 
 export default {
   name: 'DataTable',
-  components: {DataTableFluctuationCustomize, NullableTableCell, HeaderWithTooltip, TitledRow, Item, Charts, DataTableFluctuationVisualizer },
+  components: {NullableTableCell, HeaderWithTooltip, TitledRow, Item, Charts },
   mixins: [Theme, CDN, Mirror],
   props: {
     items: {
@@ -481,6 +485,12 @@ export default {
       type: Object,
       default () {
         return null
+      }
+    },
+    isRecruit: {
+      type: Boolean,
+      default () {
+        return false
       }
     }
   },
@@ -507,14 +517,14 @@ export default {
     headers () {
       const headers = [
         {
-          text: this.$t('stats.headers.quantity'),
+          text: this.isRecruit ? this.$t('stats.headers.recruitObservations') : this.$t('stats.headers.quantity'),
           value: 'quantity',
           align: 'left',
           sortable: true,
           width: '85px'
         },
         {
-          text: this.$t('stats.headers.times'),
+          text: this.isRecruit ? this.$t('stats.headers.recruitRecruits') : this.$t('stats.headers.times'),
           value: 'times',
           align: 'left',
           sortable: true,
@@ -527,39 +537,42 @@ export default {
           sortable: true,
           width: '100px'
         },
-        {
-          text: `${this.fluctuationVisualize.confidence * 100}% 置信区间 (n=${this.fluctuationVisualize.n}) 与期望获得区间`,
-          value: 'stdDev',
-          align: 'left',
-          sortable: false,
-          width: '150px'
-        },
-        {
-          text: this.$t('stats.headers.apPPR'),
-          value: 'apPPR',
-          align: 'left',
-          sortable: true,
-          width: '110px'
-        },
-        {
-          text: this.$t('stats.headers.itemPerTime'),
-          value: 'itemPerTime',
-          align: 'left',
-          sortable: true,
-          width: '110px'
-        },
-        {
-          text: this.$t('stats.headers.timeRange'),
-          value: 'timeRange',
-          align: 'left',
-          sortable: false,
-          width: '140px'
-        }
+        // {
+        //   text: `${this.fluctuationVisualize.confidence * 100}% 置信区间 (n=${this.fluctuationVisualize.n}) 与期望获得区间`,
+        //   value: 'stdDev',
+        //   align: 'left',
+        //   sortable: false,
+        //   width: '150px'
+        // },
+        ...(this.isRecruit ? [] : [
+          {
+            text: this.$t('stats.headers.apPPR'),
+            value: 'apPPR',
+            align: 'left',
+            sortable: true,
+            width: '110px'
+          },
+          {
+            text: this.$t('stats.headers.itemPerTime'),
+            value: 'itemPerTime',
+            align: 'left',
+            sortable: true,
+            width: '110px'
+          },
+          {
+            text: this.$t('stats.headers.timeRange'),
+            value: 'timeRange',
+            align: 'left',
+            sortable: false,
+            width: '140px'
+          }
+        ])
+        
       ]
 
       if (this.type === 'stage') {
         headers.unshift({
-          text: this.$t('stats.headers.item'),
+          text: this.isRecruit ? this.$t('stats.headers.recruitTag') : this.$t('stats.headers.item'),
           value: 'icon',
           align: 'left',
           sortable: false,

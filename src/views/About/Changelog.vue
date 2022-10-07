@@ -22,16 +22,12 @@
             <span
               v-if="item.future"
               class="caption"
-            >
-              正在开发
-            </span>
+            > 正在开发 </span>
 
             <span
               v-if="item.active"
               class="caption"
-            >
-              现正使用
-            </span>
+            > 现正使用 </span>
 
             {{ item.version }}
           </span>
@@ -116,17 +112,60 @@
 </template>
 
 <script>
-import anime from "animejs";
-import timeFormatter from "@/utils/timeFormatter";
-import strings from "@/utils/strings";
-import semver from "semver";
 import config from "@/config";
+import strings from "@/utils/strings";
+import timeFormatter from "@/utils/timeFormatter";
+import anime from "animejs";
+import semver from "semver";
 
 export default {
   name: "Changelog",
   data() {
     return {
       logs: [
+        {
+          version: "v3.9.0",
+          date: "2022-09-10T03:30:00+0800",
+          changes: `## 添加
+1. iOS 16 Accessory Widget 类型适配；现在可于锁屏页添加 Widget 了`,
+        },
+        {
+          version: "v3.8.1",
+          date: "2022-08-18T23:21:00+0800",
+          changes: `## 添加
+1. Datadog 错误上报与性能监控`,
+        },
+        {
+          version: "v3.8.0",
+          date: "2022-08-16T14:27:00+0800",
+          changes: `## 添加
+1. 公开招募支持
+
+## 优化
+1. 英文下 StageSelector 样式`,
+        },
+        {
+          version: "v3.7.7",
+          date: "2022-06-16T01:25:00+0800",
+          changes: `## 优化
+1. 在没有 Focus 当前页面的情况下，停止背景图片更新
+2. 首页添加 Frontend V4 Repo 链接`,
+        },
+        {
+          version: "v3.7.6",
+          date: "2022-06-16T01:25:00+0800",
+          changes: `## 优化
+1. 添加国服新掉落识别支持`,
+        },
+        {
+          version: "v3.7.5",
+          date: "2022-06-10T12:57:00+0800",
+          changes: `## 优化
+1. 添加临时截图识别不可用提示
+2. 实现部分标准差可视化 (未完成)
+3. 优化部分组件交互效果
+4. 优化部分本地化文本`,
+        },
         {
           version: "v3.7.4",
           date: "2022-05-10T12:57:00+0800",
@@ -791,10 +830,12 @@ export default {
         }
 
         // if el.date is within 30 days, set el.value to true, otherwise to false
-        timeFormatter.dayjs(el.date).isBetween(
-          timeFormatter.dayjs().subtract(30, "day"),
-          timeFormatter.dayjs()
-        )
+        timeFormatter
+          .dayjs(el.date)
+          .isBetween(
+            timeFormatter.dayjs().subtract(30, "day"),
+            timeFormatter.dayjs()
+          )
           ? (el.value = true)
           : (el.value = false);
 

@@ -1,6 +1,11 @@
 FROM node:lts AS builder
 WORKDIR /app
 
+ARG TRUNCATED_GITHUB_SHA
+ENV TRUNCATED_GITHUB_SHA $TRUNCATED_GITHUB_SHA
+
+ENV PENGUIN_BUILDFROM=docker
+
 COPY package.json .
 COPY yarn.lock .
 
@@ -9,15 +14,15 @@ RUN yarn install
 
 COPY . .
 
-ENV PENGUIN_BUILDFROM=docker
-
-RUN --mount=type=secret,id=PENGUIN_RECOGNITION_SUBMITTER_JS,target=/app/src/utils/vendors/recognitionSubmitter.js \
-    yarn build:web
+RUN yarn build:web
 
 # runner
 FROM nginx:stable AS runner
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
+
+# let nginx return index.html for any request
+COPY build/nginx-default.conf /etc/nginx/conf.d/default.conf
 
 CMD ["nginx", "-g", "daemon off;"]
